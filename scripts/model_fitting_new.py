@@ -8,16 +8,18 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import string
 import nltk
+import open_clip
 
 # You might need to download the stopwords first
 nltk.download('punkt')
 nltk.download('stopwords')
 
 def fit_model(model_to_fit, data):
-    if model_to_fit == 'bart':
-        model_name = "facebook/bart-large"
-        model = AutoModel.from_pretrained(model_name)
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
+    global model_fitting
+    if model_to_fit == 'clip':
+        model_name = 'ViT-B-32'
+        model, _, _ = open_clip.create_model_and_transforms('ViT-B-32', pretrained='laion2b_s34b_b79k')
+        tokenizer = open_clip.get_tokenizer('ViT-B-32')
     elif model_to_fit == 't5_small':
         model_name = 't5-small'
         model = T5EncoderModel.from_pretrained(model_name)
@@ -43,7 +45,7 @@ def fit_model(model_to_fit, data):
         idx = (experiment_ids == experiment_id)
         vintage_reviews = reviews[idx]
         vintage_region_id = region_ids[idx][0]
-        vintage_embedding = create_vintage_embedding(tokenizer, model, [experiment_id] * len(vintage_reviews), vintage_reviews, batch_size=10).mean(axis=0)
+        vintage_embedding = create_vintage_embedding(tokenizer, model, [experiment_id] * len(vintage_reviews), vintage_reviews, model_to_fit).mean(axis=0)
 
         vintage_embeddings[experiment_id] = vintage_embedding
         vintage_region_ids[experiment_id] = vintage_region_id
@@ -69,17 +71,21 @@ def preprocess_text(text):
     
     return text
 
-def create_vintage_embedding(tokenizer, model, vintage_ids, reviews, batch_size=10):
+def create_vintage_embedding(tokenizer, model, vintage_ids, reviews, model_name, batch_size=10):
     embeddings = []
     for i in range(0, len(vintage_ids), batch_size):
         batch_vintage_ids = vintage_ids[i:i+batch_size]
         batch_reviews = reviews[i:i+batch_size]
         input_text = [f"vintage {vintage_id}: {review}" for vintage_id, review in zip(batch_vintage_ids, batch_reviews)]
-        input_tokenized = tokenizer(input_text, return_tensors="pt", padding=True, truncation=True)
 
-        with torch.no_grad():
-            output = model(**input_tokenized)
-
-        batch_embeddings = output.last_hidden_state.mean(dim=1).numpy()
-        embeddings.append(batch_embeddings)
+        if model_name is not 'clip':
+            input_tokenized = tokenizer(input_text, return_tensors="pt", padding=True, truncation=True)
+            with torch.no_grad():
+                output = model(**input_tokenized)
+            batch_embeddings = output.last_hidden_state.mean(dim=1).numpy()
+            embeddings.append(batch_embeddings)
+        else:
+            input_tokenized = tokenizer(input_text)
+            output = model.encode_text(input_tokenized)
+            embeddings.append(output)
     return np.vstack(embeddings)

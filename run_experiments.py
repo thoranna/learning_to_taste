@@ -25,14 +25,15 @@ def create_csv_row(preprocessing_method1, model, dimensionality_reduction_method
     return row
 
 # Define the combinations of methods to try
-preprocessing_methods1 = [# 'euclidean',
-                        'triplets']
+preprocessing_methods1 = ['euclidean',
+                          'triplets']
+
 dimensionality_reduction_methods2 = ['TSNE', 'PCA', 'Umap']
 data_combination_methods = ['CCA', 'ICP', 'SNaCK']
 
-models_to_use = [# 'distil_bert',
-                 # 't5_small',
-                 'bart']
+models_to_use = ['distil_bert',
+                 't5_small',
+                 'clip']
 
 # Load data
 # TODO add images when Alireza sends them over 
@@ -48,7 +49,7 @@ csv_header = ["preprocessing_method1", "model", "dimensionality_reduction_method
               "WINE_PRICE_data1", "WINE_PRICE_data2", "WINE_PRICE_combined",
               "WINE_RATING_data1", "WINE_RATING_data2", "WINE_RATING_combined"]
 
-csv_file_path = "results/results13.csv"
+csv_file_path = "results/results.csv"
 with open(csv_file_path, "w", newline="") as csvfile:
     csv_writer = csv.writer(csvfile)
     csv_writer.writerow(csv_header)
