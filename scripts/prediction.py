@@ -1239,7 +1239,9 @@ for key in WINE_GRAPE_SIMPLIFIED:
 
 for key in WINE_RATING:
     if WINE_RATING[key] != 'Ribena':
-        WINE_RATING[key] = str(round(float(WINE_RATING[key])))
+        value = float(WINE_RATING[key])
+        rounded_value = round(value * 2) / 2
+        WINE_RATING[key] = str(rounded_value)
 
 for key in WINE_ALCOHOL_PERCENTAGE:
     if WINE_ALCOHOL_PERCENTAGE[key] != 'Ribena':

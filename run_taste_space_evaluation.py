@@ -50,21 +50,6 @@ def agreement_ratio(triplets_combined_embed, triplets_test_set_embed):
 
     return ratio
 
-data_source1a, data_source1b = data_source1_utils.load_data()
-data_source2 = data_source2_utils.load_data()
-
-preprocessing_method1 = 'triplets'
-data_combination_method = 'SNaCK'
-model_to_use = 'distil_bert'
-
-preprocessed_data1, unique_ids1, id_to_index = preprocessing.preprocess_data_source1(data_source1a, data_source1b, method=preprocessing_method1)
-unique_ids1 = [int(item) for item in  unique_ids1]
-
-preprocessed_data2 = preprocessing.preprocess_data_source2(data_source2)
-embedding_matrix2, unique_ids2 = model_fitting.fit_model(model_to_use, preprocessed_data2)
-
-aligned_triplet_list, aligned_embedding_matrix, aligned_experiment_ids, _ = data_combination.align_triplets_and_embedding_matrix(preprocessed_data1, embedding_matrix2, unique_ids1)
-
 def split_triplets(triplet_list, test_ratio=0.3):
     # Set random seed for reproducabilty 
     random.seed(42)
@@ -100,16 +85,60 @@ def split_triplets(triplet_list, test_ratio=0.3):
 
     return train_triplets, test_triplets
 
-aligned_triplet_list_train, aligned_triplet_list_test = split_triplets(aligned_triplet_list, test_ratio=0.05)
 
 # Latent = snack([train text, test text], [train flavour])
 # Eval(triplet from latent, triplets form test flavour)
 
-N, _ = aligned_embedding_matrix.shape
-snack = SNaCK(N)
-aligned_triplet_list_train = np.array(aligned_triplet_list_train)
-combined_embedding = snack.snack_embed(aligned_embedding_matrix, aligned_triplet_list_train)
-combined_embedding = combined_embedding.detach().numpy()
-triplets_combined_embed = generate_triplets(combined_embedding, aligned_experiment_ids)
-ratio = agreement_ratio(triplets_combined_embed, aligned_triplet_list_test)
-print('The agreement / disagreement ratio is:', ratio)
+models_to_use = ['albert', 'bart', 'distil_bert', 't5_small']
+
+with open('output.txt', 'w') as f:
+    for model_to_use in models_to_use:
+        print("Using model: ", model_to_use, file=f)
+        data_source1a, data_source1b = data_source1_utils.load_data()
+        data_source2 = data_source2_utils.load_data()
+
+        preprocessing_method1 = 'triplets'
+
+        preprocessed_data1, unique_ids1, id_to_index = preprocessing.preprocess_data_source1(data_source1a, data_source1b, method=preprocessing_method1)
+        unique_ids1 = [int(item) for item in  unique_ids1]
+
+        preprocessed_data2 = preprocessing.preprocess_data_source2(data_source2)
+        embedding_matrix2, unique_ids2 = model_fitting.fit_model(model_to_use, preprocessed_data2)
+
+        aligned_triplet_list, aligned_embedding_matrix, aligned_experiment_ids, _ = data_combination.align_triplets_and_embedding_matrix(preprocessed_data1, embedding_matrix2, unique_ids1)
+        aligned_triplet_list_train, aligned_triplet_list_test = split_triplets(aligned_triplet_list, test_ratio=0.05)
+
+        # SNaCK
+        N, _ = aligned_embedding_matrix.shape
+        snack = SNaCK(N)
+        aligned_triplet_list_train = np.array(aligned_triplet_list_train)
+        combined_embedding = snack.snack_embed(aligned_embedding_matrix, aligned_triplet_list_train)
+        combined_embedding = combined_embedding.detach().numpy()
+        triplets_combined_embed = generate_triplets(combined_embedding, aligned_experiment_ids)
+        ratio = agreement_ratio(triplets_combined_embed, aligned_triplet_list_test)
+        print("Taste space evaluation using SNaCK: ", file=f)
+        print('The agreement / disagreement ratio is:', ratio, file=f)
+
+        # TASTE
+        aligned_triplet_list_train = np.array(aligned_triplet_list_train)
+        combined_embedding = combined_embeddings, common_experiment_ids, _, _, _, _ = data_combination.combine_data(aligned_triplet_list_train, aligned_embedding_matrix, unique_ids1, unique_ids2, 'ICP', preprocessing_method1)
+        triplets_combined_embed = generate_triplets(combined_embedding, aligned_experiment_ids)
+        ratio = agreement_ratio(triplets_combined_embed, aligned_triplet_list_test)
+        print("Taste space evaluation using TASTE: ", file=f)
+        print('The agreement / disagreement ratio is:', ratio, file=f)
+
+        # Alternative combi 1
+        aligned_triplet_list_train = np.array(aligned_triplet_list_train)
+        combined_embedding = combined_embeddings, common_experiment_ids, _, _, _, _ = data_combination.combine_data(aligned_triplet_list_train, aligned_embedding_matrix, unique_ids1, unique_ids2, 'ICP', 'triplets')
+        triplets_combined_embed = generate_triplets(combined_embedding, aligned_experiment_ids)
+        ratio = agreement_ratio(triplets_combined_embed, aligned_triplet_list_test)
+        print("Taste space evaluation using MDS, Umap, ICP: ", file=f)
+        print('The agreement / disagreement ratio is:', ratio, file=f)
+
+        # Alternative combi 2
+        aligned_triplet_list_train = np.array(aligned_triplet_list_train)
+        combined_embedding = combined_embeddings, common_experiment_ids, _, _, _, _ = data_combination.combine_data(aligned_triplet_list_train, aligned_embedding_matrix, unique_ids1, unique_ids2, 'ICP', 'triplets')
+        triplets_combined_embed = generate_triplets(combined_embedding, aligned_experiment_ids)
+        ratio = agreement_ratio(triplets_combined_embed, aligned_triplet_list_test)
+        print("Taste space evaluation using MDS, PCA, CCA: ", file=f)
+        print('The agreement / disagreement ratio is:', ratio, file=f)

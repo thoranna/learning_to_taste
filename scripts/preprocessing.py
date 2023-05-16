@@ -69,10 +69,6 @@ def preprocess_data_source2(data):
     data['experiment_id'].replace(duplicate_key_mapping, inplace=True)
     return data
 
-#TODO: are we implementing this? 
-def preprocess_data_source3(data):
-    pass
-
 def remove_duplicate_ids(data):
     new_data = {}
     for experiment_key, experiment_value in data['generated_data'].items():
