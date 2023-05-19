@@ -9,7 +9,6 @@ from .utils.dimensionality_reduction import pca_torch
 from .utils.binary_search import x2p_torch
 
 if torch.cuda.is_available():
-    print("set use cuda")
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
 else:
     torch.set_default_tensor_type(torch.FloatTensor)
@@ -113,7 +112,6 @@ class TSNE():
 
             if (iter + 1) % 10 == 0:
                 C = torch.sum(P_ij * torch.log(P_ij / Q_ij))
-                print("Iteration %d: error is %f" % (iter + 1, C))
 
             # Stop lying about P-values
             if iter == 100:
@@ -125,8 +123,6 @@ class TSNE():
 
 
 if __name__ == "__main__":
-    print("Run Y = tsne.tsne(X, no_dims, perplexity) to perform t-SNE on your dataset.")
-
     X = np.loadtxt("mnist2500_X.txt")
     X -= np.mean(X, 0)
     X /= np.max(np.abs(X))

@@ -28,7 +28,6 @@ def x2p_torch(X, tol=1e-5, perplexity=30.0):
     """
 
     # Initialize some variables
-    print("Computing pairwise distances...")
     (n, d) = X.shape
 
     sum_X = torch.sum(X*X, 1)
@@ -41,11 +40,6 @@ def x2p_torch(X, tol=1e-5, perplexity=30.0):
 
     # Loop over all datapoints
     for i in range(n):
-
-        # Print progress
-        if i % 500 == 0:
-            print("Computing P-values for point %d of %d..." % (i, n))
-
         # Compute the Gaussian kernel and entropy for the current precision
         # there may be something wrong with this setting None
         betamin = None
@@ -84,8 +78,7 @@ def x2p_torch(X, tol=1e-5, perplexity=30.0):
             P = P.float()
         elif thisP.dtype == torch.float64:
             P = P.double()
-        else:
-            print("thisP is neither float nor double")
+
         P[i, n_list[0:i]+n_list[i+1:n]] = thisP
 
     # Return final P-matrix

@@ -2,9 +2,6 @@ import numpy as np
 from sklearn.cross_decomposition import CCA
 from packages.snack.embedding.snack import SNaCK
 from packages.icp.icp import icp
-from imblearn.over_sampling import RandomOverSampler
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score
 
 def combine_data(data1, data2, unique_ids1, unique_ids2, method, preprocessing_method1):
     if method == 'CCA':
@@ -30,7 +27,6 @@ def combine_data(data1, data2, unique_ids1, unique_ids2, method, preprocessing_m
     elif method == 'SNaCK':
         aligned_triplet_list, aligned_embedding_matrix, aligned_experiment_ids, _ = align_triplets_and_embedding_matrix(data1, data2, unique_ids2)
         aligned_triplet_list = np.array(aligned_triplet_list)
-        print(aligned_embedding_matrix)
         N, _ = aligned_embedding_matrix.shape
         data2 -= np.mean(data2, 0)
         data2 /= np.max(np.abs(data2))

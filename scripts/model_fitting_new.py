@@ -69,7 +69,6 @@ def fit_model(model_to_fit, data):
         vintage_embeddings[experiment_id] = vintage_embedding
         vintage_region_ids[experiment_id] = vintage_region_id
 
-    print(list(vintage_embeddings.values()))
     embedding_matrix = np.array(list(vintage_embeddings.values()), dtype=object)
     return embedding_matrix, unique_experiment_ids
 

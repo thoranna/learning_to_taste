@@ -80,13 +80,9 @@ class SNaCK():
 
                 if (iter + 1) % 10 == 0:
                     C = torch.sum(self.contrib_cost_triplets*tste_loss + self.contrib_cost_tsne*tsne_loss).detach().cpu().numpy().item()
-                    print("Iteration %d: error is %f" % (iter + 1, C))
-                    print("Iteration %d: grad is %f" % (iter + 1, torch.sum(self.contrib_cost_triplets*tste_gradient + self.contrib_cost_tsne*tsne_gradient).detach().cpu().numpy().item()))
                     if C> self.last_loss:
                         self.triggertimes +=1
-                        print('Trigger Times:', self.triggertimes)
-                        if self.triggertimes>=self.patience:
-                            print('Early stopping!\nStart to test process.')
+                        if self.triggertimes >= self.patience:
                             self.should_return_embedding = True
                             break
                     else:
@@ -144,5 +140,3 @@ if __name__ == "__main__":
     ax.grid(True)
     ax.legend()
     plt.show()
-
-    print("done")
