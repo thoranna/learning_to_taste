@@ -7,19 +7,65 @@ import numpy as np
 
 RIBENA = False
 
+# def predict_classes(data1_embedding, data2_embedding, combined_embedding, data1_experiment_ids, data2_experiment_ids, common_experiment_ids):
+#     report = {}
+#     data_sources_ids = {"data1": (data1_embedding, data1_experiment_ids),
+#                         "data2": (data2_embedding, data2_experiment_ids),
+#                         "combined": (combined_embedding, common_experiment_ids)}
+#     for k, d in DICTIONARIES.items():
+#         report[k] = {}
+#         for name, (data_source, ids) in data_sources_ids.items():
+#             labels = [d[int(key)] for key in ids]
+#             # Remove classes with less than 5 members and 'Blend' class from 'WINE_GRAPE'
+#             label_counts = Counter(labels)
+#             labels, ids, data_source = zip(*[(label, id, vector) for label, id, vector in zip(labels, ids, data_source) if label_counts[label] >= 1])
+            
+#             labels = list(labels)
+#             ids = list(ids)
+#             data_source = np.array(data_source)
+
+#             if isinstance(labels[0], str):
+#                 le = LabelEncoder()
+#                 labels = le.fit_transform(labels)
+
+#             # Initialize the cross-validator
+#             skf = StratifiedKFold(n_splits=5, random_state=42, shuffle=True)
+
+#             scores = []
+#             for train_index, test_index in skf.split(data_source, labels):
+#                 X_train, X_test = data_source[train_index], data_source[test_index]
+#                 y_train, y_test = labels[train_index], labels[test_index]
+#                 ru = RandomOverSampler(sampling_strategy='not majority', random_state=42)
+#                 X_res, y_res = ru.fit_resample(X_train, y_train)
+
+#                 # Create and train the classifier
+#                 clf = KNeighborsClassifier()
+#                 clf.fit(X_res, y_res)
+#                 score = round(clf.score(X_test, y_test), 2)
+#                 scores.append(score)
+
+#             # Compute the average score
+#             avg_score = round(sum(scores) / len(scores), 2)
+#             # Multiply by 100 to get %
+#             report[k][name] = round(avg_score*100, 2)
+#     print("report: ", report)
+#     return report
+
+
 def predict_classes(data1_embedding, data2_embedding, combined_embedding, data1_experiment_ids, data2_experiment_ids, common_experiment_ids):
     report = {}
+    shuffled_report = {}
     data_sources_ids = {"data1": (data1_embedding, data1_experiment_ids),
                         "data2": (data2_embedding, data2_experiment_ids),
                         "combined": (combined_embedding, common_experiment_ids)}
     for k, d in DICTIONARIES.items():
         report[k] = {}
+        shuffled_report[k] = {}
         for name, (data_source, ids) in data_sources_ids.items():
             labels = [d[int(key)] for key in ids]
-            # Remove classes with less than 5 members and 'Blend' class from 'WINE_GRAPE'
             label_counts = Counter(labels)
             labels, ids, data_source = zip(*[(label, id, vector) for label, id, vector in zip(labels, ids, data_source) if label_counts[label] >= 1])
-            
+
             labels = list(labels)
             ids = list(ids)
             data_source = np.array(data_source)
@@ -28,28 +74,37 @@ def predict_classes(data1_embedding, data2_embedding, combined_embedding, data1_
                 le = LabelEncoder()
                 labels = le.fit_transform(labels)
 
-            # Initialize the cross-validator
             skf = StratifiedKFold(n_splits=5, random_state=42, shuffle=True)
 
             scores = []
+            shuffled_scores = []
             for train_index, test_index in skf.split(data_source, labels):
                 X_train, X_test = data_source[train_index], data_source[test_index]
                 y_train, y_test = labels[train_index], labels[test_index]
                 ru = RandomOverSampler(sampling_strategy='not majority', random_state=42)
                 X_res, y_res = ru.fit_resample(X_train, y_train)
 
-                # Create and train the classifier
                 clf = KNeighborsClassifier()
                 clf.fit(X_res, y_res)
                 score = round(clf.score(X_test, y_test), 2)
                 scores.append(score)
+                
+                # Shuffling labels for random accuracy
+                np.random.shuffle(y_test)
+                shuffled_score = round(clf.score(X_test, y_test), 2)
+                shuffled_scores.append(shuffled_score)
 
-            # Compute the average score
             avg_score = round(sum(scores) / len(scores), 2)
-            # Multiply by 100 to get %
+            avg_shuffled_score = round(sum(shuffled_scores) / len(shuffled_scores), 2)
+
             report[k][name] = round(avg_score*100, 2)
+            shuffled_report[k][name] = round(avg_shuffled_score*100, 2)
+
     print("report: ", report)
-    return report
+    print("shuffled report: ", shuffled_report)
+
+    return report, shuffled_report
+
 
 
 # Duplicate keys in the dataset (wines that were duplicates and not annotated during the datacollection events as such)

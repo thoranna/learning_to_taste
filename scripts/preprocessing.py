@@ -18,7 +18,7 @@ vintage_to_experiment_map = dict(zip(csv_data['vintage_id'], csv_data['experimen
 if not RIBENA:
     # Ribena ID
     value_to_remove = 67
-    vintage_to_experiment_map = {k: v for k, v in vintage_to_experiment_map.items() if v != value_to_remove}
+    vintage_to_experiment_map = {int(k): int(v) for k, v in vintage_to_experiment_map.items() if v != value_to_remove}
 
 def preprocess_data_source1(data_source_napping, data_source_rounds, method):
     data_source_napping = remove_duplicate_ids(data_source_napping)

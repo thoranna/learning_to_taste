@@ -130,7 +130,8 @@ def fit_combine(data1, data2, data1_method, data2_method, combination_method):
 # Latent = snack([train text, test text], [train flavour])
 # Eval(triplet from latent, triplets form test flavour)
 
-models_to_use = ['distil_bert', 't5_small', 'albert', 'bart']
+# models_to_use = ['distil_bert', 't5_small', 'albert', 'bart']
+models_to_use = ['vit_base', 'deit_small', 'resnet', 'clip_image', 'clip']
 data1_processing_methods = ['t-STE', 'MDS']
 data2_processing_methods = ['UMAP', 't-SNE']
 combination_methods = ['CCA', 'ICP']

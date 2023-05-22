@@ -33,7 +33,7 @@ preprocessing_methods1 = ['euclidean',
 dimensionality_reduction_methods2 = ['TSNE', 'PCA', 'Umap']
 data_combination_methods = ['CCA', 'ICP', 'SNaCK']
 
-models_to_use = ['albert', 'bart', 'distil_bert', 't5_small']
+models_to_use = ['vit_base', 'deit_small', 'resnet', 'clip_image'] + ['clip'] + ['t5_small', 'albert', 'bart', 'pegasus', 'distil_bert', 'clip_text']
 
 # Load data
 data_source1a, data_source1b = data_source1_utils.load_data()
@@ -48,13 +48,15 @@ csv_header = ["preprocessing_method1", "model", "dimensionality_reduction_method
               "WINE_PRICE_data1", "WINE_PRICE_data2", "WINE_PRICE_combined",
               "WINE_RATING_data1", "WINE_RATING_data2", "WINE_RATING_combined","time","memory","cpu_percent"]
 
-csv_file_path = "results/results70.csv"
+csv_file_path = "results/results.csv"
 with open(csv_file_path, "w", newline="") as csvfile:
     csv_writer = csv.writer(csvfile)
     csv_writer.writerow(csv_header)
 
-# Set flag to true if the models have already been trained and saved to saved_model folder
-TRAINED = False
+csv_file_path_rand = "results/results_random.csv"
+with open(csv_file_path_rand, "w", newline="") as csvfile:
+    csv_writer = csv.writer(csvfile)
+    csv_writer.writerow(csv_header)
 
 # Iterate over combinations of methods
 num = 0
@@ -75,11 +77,7 @@ for preprocessing_method1 in preprocessing_methods1:
         reduced_embeddings1 = dimensionality_reduction.reduce_data1(preprocessed_data1, method=dimensionality_reduction_method1, ids=unique_ids1)
     preprocessed_data2 = preprocessing.preprocess_data_source2(data_source2)
     for model_to_use in models_to_use:
-        print("model: ", model_to_use)
-        if not TRAINED:
-            embedding_matrix2, unique_ids2 = model_fitting.fit_model(model_to_use, preprocessed_data2)
-        else:
-            embedding_matrix2, unique_ids2 = model_fitting.fetch_model('./saved_models/'+model_to_use, preprocessed_data2)
+        embedding_matrix2, unique_ids2 = model_fitting.fit_model(model_to_use, preprocessed_data2)
         for dimensionality_reduction_method2 in dimensionality_reduction_methods2:
             print("dimensionality_reduction_method2: ", dimensionality_reduction_method2)
             reduced_embeddings2 = dimensionality_reduction.reduce_data2(embedding_matrix2, dimensionality_reduction_method2, unique_ids2)
@@ -95,12 +93,12 @@ for preprocessing_method1 in preprocessing_methods1:
                         print(embedding_matrix2)
                         combined_embeddings, common_experiment_ids, _, _, _, _ = data_combination.combine_data(preprocessed_data1, embedding_matrix2, unique_ids1, unique_ids2, data_combination_method, preprocessing_method1)
                         combined_embeddings = combined_embeddings.detach().numpy()
-                        predictions = prediction.predict_classes(reduced_embeddings1,
-                                                                 reduced_embeddings2,
-                                                                 combined_embeddings,
-                                                                 unique_ids1,
-                                                                 unique_ids2,
-                                                                 common_experiment_ids)
+                        predictions, random_predictions = prediction.predict_classes(reduced_embeddings1,
+                                                                                     reduced_embeddings2,
+                                                                                     combined_embeddings,
+                                                                                     unique_ids1,
+                                                                                     unique_ids2,
+                                                                                     common_experiment_ids)
                         # Write the results to the CSV file
                         _end = time.time()
                         _memory_use_after = py.memory_info()[0] / 2. ** 30  # Memory use in GB
@@ -116,6 +114,17 @@ for preprocessing_method1 in preprocessing_methods1:
                                                  _memory,
                                                  _cpu_percent)
                         with open(csv_file_path, "a", newline="") as csvfile:
+                            csv_writer = csv.writer(csvfile)
+                            csv_writer.writerow(csv_row)
+                        csv_row = create_csv_row(preprocessing_method1,
+                                                 model_to_use,
+                                                 dimensionality_reduction_method2,
+                                                 data_combination_method,
+                                                 random_predictions,
+                                                 _time,
+                                                 _memory,
+                                                 _cpu_percent)
+                        with open(csv_file_path_rand, "a", newline="") as csvfile:
                             csv_writer = csv.writer(csvfile)
                             csv_writer.writerow(csv_row)
                         visualize.visualize_embeddings(reduced_embeddings1,
@@ -138,11 +147,12 @@ for preprocessing_method1 in preprocessing_methods1:
                                                                                                unique_ids2,
                                                                                                data_combination_method,
                                                                                                preprocessing_method1)
-                    predictions = prediction.predict_classes(reduced_embeddings1,
-                                                             reduced_embeddings2,
-                                                             combined_embeddings,
-                                                             unique_ids1, unique_ids2,
-                                                             common_experiment_ids)
+                    predictions, random_predictions = prediction.predict_classes(reduced_embeddings1,
+                                                                                 reduced_embeddings2,
+                                                                                 combined_embeddings,
+                                                                                 unique_ids1,
+                                                                                 unique_ids2,
+                                                                                 common_experiment_ids)
                     print("predictions: ", predictions)
                     # Write the results to the CSV file
                     _end = time.time()
@@ -159,6 +169,17 @@ for preprocessing_method1 in preprocessing_methods1:
                                              _memory,
                                              _cpu_percent)
                     with open(csv_file_path, "a", newline="") as csvfile:
+                        csv_writer = csv.writer(csvfile)
+                        csv_writer.writerow(csv_row)
+                    csv_row = create_csv_row(preprocessing_method1,
+                                                 model_to_use,
+                                                 dimensionality_reduction_method2,
+                                                 data_combination_method,
+                                                 random_predictions,
+                                                 _time,
+                                                 _memory,
+                                                 _cpu_percent)
+                    with open(csv_file_path_rand, "a", newline="") as csvfile:
                         csv_writer = csv.writer(csvfile)
                         csv_writer.writerow(csv_row)
                     visualize.visualize_embeddings(reduced_embeddings1,
