@@ -7,6 +7,20 @@ from .utils.optimizer import SGDOptimizer
 from .utils.kernels import cauchy_kernel, euclidean_distance_squared
 from .utils.dimensionality_reduction import pca_torch
 from .utils.binary_search import x2p_torch
+import random
+
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+# Added for reproducability
+np.random.seed(42)
+set_seed(42)
 
 if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
@@ -15,15 +29,18 @@ else:
 
 
 def set_distance_to_own_point_to_zero(distance_matrix, n):
+    set_seed(42)
     distance_matrix[range(n), range(n)] = 0.
 
 def prevent_values_being_too_low(Q, tolerance=torch.tensor([1e-12])):
+    set_seed(42)
     return torch.max(Q, tolerance)
 
 
 class TSNEGrad():
     def __init__(self, no_dims) -> None:
         self.no_dims = no_dims
+        set_seed(42)
 
     def allocate_resources(self, n):
         self.dY = torch.zeros(n, self.no_dims)
@@ -44,6 +61,7 @@ class TSNEGrad():
 
 class TSNE():
     def __init__(self, no_dims:int=2, perplexity=30.0, optimizer:SGDOptimizer = SGDOptimizer(500) ) -> None:
+        set_seed(42)
         self.max_iter = 1000
         self.initial_dims = 50
         self.no_dims = no_dims

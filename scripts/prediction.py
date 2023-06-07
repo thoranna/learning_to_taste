@@ -1,110 +1,233 @@
 from sklearn.preprocessing import LabelEncoder
 from sklearn.neighbors import KNeighborsClassifier
 from imblearn.over_sampling import RandomOverSampler
-from sklearn.model_selection import StratifiedKFold
+from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.svm import SVC
+from sklearn.model_selection import KFold
+from imblearn.over_sampling import RandomOverSampler
+from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import f1_score
 from collections import Counter
+from sklearn.dummy import DummyClassifier
 import numpy as np
 
 RIBENA = False
 
-# def predict_classes(data1_embedding, data2_embedding, combined_embedding, data1_experiment_ids, data2_experiment_ids, common_experiment_ids):
-#     report = {}
-#     data_sources_ids = {"data1": (data1_embedding, data1_experiment_ids),
-#                         "data2": (data2_embedding, data2_experiment_ids),
-#                         "combined": (combined_embedding, common_experiment_ids)}
-#     for k, d in DICTIONARIES.items():
-#         report[k] = {}
-#         for name, (data_source, ids) in data_sources_ids.items():
-#             labels = [d[int(key)] for key in ids]
-#             # Remove classes with less than 5 members and 'Blend' class from 'WINE_GRAPE'
-#             label_counts = Counter(labels)
-#             labels, ids, data_source = zip(*[(label, id, vector) for label, id, vector in zip(labels, ids, data_source) if label_counts[label] >= 1])
-            
-#             labels = list(labels)
-#             ids = list(ids)
-#             data_source = np.array(data_source)
+def single_label(data_embedding, experiment_ids, d):
+    labels = [d[int(key)] for key in experiment_ids]
+    label_counts = Counter(labels)
+    labels, ids, data_source = zip(*[(label, id, vector) for label, id, vector in zip(labels, experiment_ids, data_embedding) if label_counts[label] >= 1])
 
-#             if isinstance(labels[0], str):
-#                 le = LabelEncoder()
-#                 labels = le.fit_transform(labels)
+    labels = list(labels)
+    ids = list(ids)
+    data_source = np.array(data_source)
 
-#             # Initialize the cross-validator
-#             skf = StratifiedKFold(n_splits=5, random_state=42, shuffle=True)
+    if isinstance(labels[0], str):
+        le = LabelEncoder()
+        labels = le.fit_transform(labels)
 
-#             scores = []
-#             for train_index, test_index in skf.split(data_source, labels):
-#                 X_train, X_test = data_source[train_index], data_source[test_index]
-#                 y_train, y_test = labels[train_index], labels[test_index]
-#                 ru = RandomOverSampler(sampling_strategy='not majority', random_state=42)
-#                 X_res, y_res = ru.fit_resample(X_train, y_train)
+    kf = KFold(n_splits=5, random_state=42, shuffle=True)
+    scores = []
+    shuffled_scores = []
+    f1_scores = []
+    shuffled_f1_scores = []
+    for train_index, test_index in kf.split(data_source, labels):
+        X_train, X_test = data_source[train_index], data_source[test_index]
+        y_train, y_test = labels[train_index], labels[test_index]
+        ru = RandomOverSampler(sampling_strategy='not majority', random_state=42)
+        X_res, y_res = ru.fit_resample(X_train, y_train)
 
-#                 # Create and train the classifier
-#                 clf = KNeighborsClassifier()
-#                 clf.fit(X_res, y_res)
-#                 score = round(clf.score(X_test, y_test), 2)
-#                 scores.append(score)
+        clf = SVC(random_state=42, class_weight='balanced')
+        clf.fit(X_res, y_res)
+        score = round(clf.score(X_test, y_test), 2)
+        scores.append(score)
+        y_pred = clf.predict(X_test)
+        f1 = f1_score(y_test, y_pred, average='micro')
+        f1_scores.append(f1)
+        
+        # Establishing a dummy classifier as a baseline
+        dummy_clf = DummyClassifier(strategy="stratified", random_state=42)
+        dummy_clf.fit(X_res, y_res)
+        y_pred = dummy_clf.predict(X_test)
+        shuffled_score = round(dummy_clf.score(X_test, y_test), 2)
+        shuffled_scores.append(shuffled_score)
+        shuffled_f1 = f1_score(y_test, y_pred, average='micro')
+        shuffled_scores.append(shuffled_score)
+        shuffled_f1_scores.append(shuffled_f1)
 
-#             # Compute the average score
-#             avg_score = round(sum(scores) / len(scores), 2)
-#             # Multiply by 100 to get %
-#             report[k][name] = round(avg_score*100, 2)
-#     print("report: ", report)
-#     return report
+    avg_score = round(sum(scores) / len(scores), 2)
+    avg_f1_score = round(sum(f1_scores) / len(f1_scores), 2)
+    avg_shuffled_score = round(sum(shuffled_scores) / len(shuffled_scores), 2)
+    avg_shuffled_f1_score = round(sum(shuffled_f1_scores) / len(shuffled_f1_scores), 2)
+    return avg_score, avg_f1_score, avg_shuffled_score, avg_shuffled_f1_score
+
+def get_multi_labels(dictionaries, ids):
+    multi_labels = []
+    for id in ids:
+        labels = []
+        for dictionary in dictionaries.values():
+            labels.append(dictionary[int(id)])
+        multi_labels.append(labels)
+    return multi_labels
+
+def multi_label(data_embedding, experiment_ids, dictionaries):
+    labels = get_multi_labels(dictionaries, experiment_ids)
+    label_counts = Counter(tuple(x) for x in labels)  # count tuple of labels
+    mlb = MultiLabelBinarizer()
+    transformed_labels = mlb.fit_transform(labels)
+    print(transformed_labels)
+    print(experiment_ids)
+    print(data_embedding)
+    
+    filtered_data = [(label, id, vector) for label, id, vector in zip(transformed_labels, experiment_ids, data_embedding)]
+    labels, ids, data_source = zip(*filtered_data)
+    
+    data_source = np.array(data_source)
+    labels = np.array(labels)
+    
+    kf = KFold(n_splits=5, random_state=42, shuffle=True)
+
+    scores = []
+    shuffled_scores = []
+    f1_scores = []
+    shuffled_f1_scores = []
+    for train_index, test_index in kf.split(data_source):
+        X_train, X_test = data_source[train_index], data_source[test_index]
+        y_train, y_test = labels[train_index], labels[test_index]
+
+        clf = OneVsRestClassifier(SVC(random_state=42, class_weight='balanced'))
+        clf.fit(X_train, y_train)
+        y_pred = clf.predict(X_test)
+        score = round(clf.score(X_test, y_test), 2)
+        f1 = f1_score(y_test, y_pred, average='samples')
+        scores.append(score)
+        f1_scores.append(f1)
+        
+        # Create a dummy classifier as a baseline
+        dummy_clf = DummyClassifier(strategy="stratified", random_state=42)
+        dummy_clf.fit(X_train, y_train)
+        y_pred = dummy_clf.predict(X_test)
+        shuffled_score = round(dummy_clf.score(X_test, y_test), 2)
+        shuffled_f1 = f1_score(y_test, y_pred, average='samples')
+        shuffled_scores.append(shuffled_score)
+        shuffled_f1_scores.append(shuffled_f1)
+
+    avg_score = round(sum(scores) / len(scores), 2)
+    avg_f1_score = round(sum(f1_scores) / len(f1_scores), 2)
+    avg_shuffled_score = round(sum(shuffled_scores) / len(shuffled_scores), 2)
+    avg_shuffled_f1_score = round(sum(shuffled_f1_scores) / len(shuffled_f1_scores), 2)
+    
+    return avg_score, avg_f1_score, avg_shuffled_score, avg_shuffled_f1_score
 
 
 def predict_classes(data1_embedding, data2_embedding, combined_embedding, data1_experiment_ids, data2_experiment_ids, common_experiment_ids):
-    report = {}
-    shuffled_report = {}
+    report = {"single": {}, "multi": {}}
+    shuffled_report = {"single": {}, "multi": {}}
+    increment_report = {"single": {"accuracy": {}, "f1_score": {}}, "multi": {"accuracy": {}, "f1_score": {}}}
+    shuffled_increment_report = {"single": {"accuracy": {}, "f1_score": {}}, "multi": {"accuracy": {}, "f1_score": {}}}
     data_sources_ids = {"data1": (data1_embedding, data1_experiment_ids),
                         "data2": (data2_embedding, data2_experiment_ids),
                         "combined": (combined_embedding, common_experiment_ids)}
+    
+    def single(name, data_source, ids, d, k, report, shuffled_report):
+        avg_score, avg_f1_score, avg_shuffled_score, avg_shuffled_f1_score = single_label(data_source, ids, d)
+        # Ensure report[name] exists and is a dictionary
+        if name not in report:
+            report[name] = {}
+        if name not in shuffled_report:
+            shuffled_report[name] = {}
+        report[name][k] = {"accuracy": round(avg_score*100, 2), "f1_score": avg_f1_score}
+        shuffled_report[name][k] = {"accuracy": round(avg_shuffled_score*100, 2), "f1_score": avg_shuffled_f1_score}
+    
+    def multi(name, data_source, ids, d, report, shuffled_report):
+        avg_score, avg_f1_score, avg_shuffled_score, avg_shuffled_f1_score = multi_label(data_source, ids, d)
+        report[name] = {"accuracy": round(avg_score*100, 2), "f1_score": avg_f1_score}
+        shuffled_report[name] = {"accuracy": round(avg_shuffled_score*100, 2), "f1_score": avg_shuffled_f1_score}
+
+    base_acc_1 = base_acc_2 = base_shuffled_acc_1 = base_shuffled_acc_2 = increment_acc_1 = shuffled_increment_acc_1 = 0
+    base_f1_1 = base_f1_2 = base_shuffled_f1_1 = base_shuffled_f1_2  = increment_f1_1 = shuffled_increment_f1_1 = 0
+
     for k, d in DICTIONARIES.items():
-        report[k] = {}
-        shuffled_report[k] = {}
         for name, (data_source, ids) in data_sources_ids.items():
-            labels = [d[int(key)] for key in ids]
-            label_counts = Counter(labels)
-            labels, ids, data_source = zip(*[(label, id, vector) for label, id, vector in zip(labels, ids, data_source) if label_counts[label] >= 1])
+            single(name, data_source, ids, d, k, report["single"], shuffled_report["single"])
+            multi(name, data_source, ids, DICTIONARIES, report["multi"], shuffled_report["multi"])
 
-            labels = list(labels)
-            ids = list(ids)
-            data_source = np.array(data_source)
+    avg_combined_acc = 0
+    avg_shuffled_combined_acc = 0
 
-            if isinstance(labels[0], str):
-                le = LabelEncoder()
-                labels = le.fit_transform(labels)
+    avg_combined_f1 = 0
+    avg_data2_f1 = 0
+    avg_shuffled_combined_f1 = 0
+    avg_shuffled_data2_f1 = 0
+    for k, d in DICTIONARIES.items():
+        # Compute incrementation for method 1 (single-label)
+        base_acc_1 = max(report["single"]["data1"][k]["accuracy"], report["single"]["data2"][k]["accuracy"])
+        base_shuffled_acc_1 = max(shuffled_report["single"]["data1"][k]["accuracy"], shuffled_report["single"]["data2"][k]["accuracy"])
 
-            skf = StratifiedKFold(n_splits=5, random_state=42, shuffle=True)
+        increment_acc_1 += report["single"]["combined"][k]["accuracy"] - base_acc_1
+        shuffled_increment_acc_1 += shuffled_report["single"]["combined"][k]["accuracy"] - base_shuffled_acc_1
 
-            scores = []
-            shuffled_scores = []
-            for train_index, test_index in skf.split(data_source, labels):
-                X_train, X_test = data_source[train_index], data_source[test_index]
-                y_train, y_test = labels[train_index], labels[test_index]
-                ru = RandomOverSampler(sampling_strategy='not majority', random_state=42)
-                X_res, y_res = ru.fit_resample(X_train, y_train)
+        avg_combined_acc += report["single"]["combined"][k]["accuracy"]
+        avg_shuffled_combined_acc += shuffled_report["single"]["combined"][k]["accuracy"]
 
-                clf = KNeighborsClassifier()
-                clf.fit(X_res, y_res)
-                score = round(clf.score(X_test, y_test), 2)
-                scores.append(score)
-                
-                # Shuffling labels for random accuracy
-                np.random.shuffle(y_test)
-                shuffled_score = round(clf.score(X_test, y_test), 2)
-                shuffled_scores.append(shuffled_score)
+        # Compute incrementation for method 1 (single-label)
+        base_f1_1 += max(report["single"]["data1"][k]["f1_score"], report["single"]["data2"][k]["f1_score"])
+        base_shuffled_f1_1 += max(shuffled_report["single"]["data1"][k]["f1_score"], shuffled_report["single"]["data2"][k]["f1_score"])
 
-            avg_score = round(sum(scores) / len(scores), 2)
-            avg_shuffled_score = round(sum(shuffled_scores) / len(shuffled_scores), 2)
+        increment_f1_1 += report["single"]["combined"][k]["f1_score"] - base_f1_1
+        shuffled_increment_f1_1 += shuffled_report["single"]["combined"][k]["f1_score"] - base_shuffled_f1_1
 
-            report[k][name] = round(avg_score*100, 2)
-            shuffled_report[k][name] = round(avg_shuffled_score*100, 2)
+        avg_combined_acc += report["single"]["combined"][k]["f1_score"]
+        avg_shuffled_combined_acc += shuffled_report["single"]["combined"][k]["f1_score"]
 
-    print("report: ", report)
-    print("shuffled report: ", shuffled_report)
+        avg_combined_f1 += report["single"]["combined"][k]["f1_score"]
+        avg_shuffled_combined_f1 += shuffled_report["single"]["combined"][k]["f1_score"]
 
-    return report, shuffled_report
+        avg_data2_f1 += report["single"]["data2"][k]["f1_score"]
+        avg_shuffled_data2_f1 += shuffled_report["single"]["data2"][k]["f1_score"]
+    
+    for metric in ["f1_score", "accuracy"]:
+        increment_report["single"][metric] = {"increment": round(increment_acc_1 * 100, 2)}
+        shuffled_increment_report["single"][metric] = {"increment": round(shuffled_increment_acc_1 * 100, 2)}
 
+    avg_combined_acc /= len(list(DICTIONARIES.keys()))
+    avg_shuffled_combined_acc /= len(list(DICTIONARIES.keys()))
+    avg_combined_f1 /= len(list(DICTIONARIES.keys()))
+    avg_shuffled_combined_f1 /= len(list(DICTIONARIES.keys()))
+    avg_data2_f1 /= len(list(DICTIONARIES.keys()))
+    avg_shuffled_data2_f1 /= len(list(DICTIONARIES.keys()))
+
+    # Compute incrementation for method 2 (multi-label)
+    for metric in ["f1_score", "accuracy"]:
+        base_acc_2 = max(report["multi"]["data1"][metric], report["multi"]["data2"][metric])
+        base_shuffled_acc_2 = max(shuffled_report["multi"]["data1"][metric], shuffled_report["multi"]["data2"][metric])
+
+        increment_acc_2 = report["multi"]["combined"][metric] - base_acc_2
+        shuffled_increment_acc_2 = shuffled_report["multi"]["combined"][metric] - base_shuffled_acc_2
+        
+        if metric != "f1_score":
+            increment_report["multi"][metric] = {"increment": round(increment_acc_2 * 100, 2)}
+            shuffled_increment_report["multi"][metric] = {"increment": round(shuffled_increment_acc_2 * 100, 2)}
+        else:
+            increment_report["multi"][metric] = {"increment":increment_acc_2}
+            shuffled_increment_report["multi"][metric] = {"increment": shuffled_increment_acc_2}
+    print(increment_report['multi'])
+    avg_score_report = {"real": {"accuracy": avg_combined_acc,
+                                 "f1_score": avg_combined_f1,
+                                 "f1_score_d2": avg_data2_f1},
+                        "shuffled": {"accuracy": avg_shuffled_combined_acc,
+                                     "f1_score": avg_shuffled_combined_f1,
+                                     "f1_score_d2": avg_shuffled_data2_f1}}
+    print("increment report: ", increment_report)
+    print("shuffled increment report: ", shuffled_increment_report)
+    print("Report: ", report)
+    print("Shuffled report: ", shuffled_report)
+    print("Incrementation report: ", increment_report)
+    print("Shuffled incrementation report: ", shuffled_increment_report)
+    return report, shuffled_report, increment_report, shuffled_increment_report, avg_score_report
 
 
 # Duplicate keys in the dataset (wines that were duplicates and not annotated during the datacollection events as such)

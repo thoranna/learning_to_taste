@@ -19,7 +19,7 @@ def visualize_embeddings(data1_embedding, data2_embedding, combined_embedding, d
 
     le = LabelEncoder()
     
-    for dk_idx, (dk, d) in enumerate(DICTIONARIES.items()):
+    for _, (dk, d) in enumerate(DICTIONARIES.items()):
         all_labels = []
         for i, (name, (data_source, ids, method)) in enumerate(data_sources.items()):
             labels = [d[int(key)] for key in ids]

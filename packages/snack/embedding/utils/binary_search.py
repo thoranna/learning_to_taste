@@ -1,6 +1,18 @@
 import torch
+import numpy as np
+import random
+
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
 
 def Hbeta_torch(D, beta=1.0):
+    set_seed(42)
     P = torch.exp(-D.clone() * beta)
     P = torch.max(P, torch.tensor([1e-12]))
     sumP = torch.sum(P)
@@ -12,9 +24,11 @@ def Hbeta_torch(D, beta=1.0):
 
 
 def binary_search_perplexity(X, perplexity:float=30.0):
+    set_seed(42)
     pass
 
 def binary_search_precision_for_ith_conditional_distribution():
+    set_seed(42)
     n_steps=100
     for _ in range(n_steps):
         pass
@@ -26,6 +40,7 @@ def x2p_torch(X, tol=1e-5, perplexity=30.0):
         Performs a binary search to get P-values in such a way that each
         conditional Gaussian has the same perplexity.
     """
+    set_seed(42)
 
     # Initialize some variables
     (n, d) = X.shape

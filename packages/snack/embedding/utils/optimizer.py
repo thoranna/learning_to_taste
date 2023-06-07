@@ -1,11 +1,22 @@
 import torch
+import numpy as np
+import random
+
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
 
 class TSNEMomentum():
     def __init__(self, initial_momentum=0.5,final_momentum=0.8, momentum_switch_iter=20 ) -> None:
+        set_seed(42)
         self.final_momentum = final_momentum
         self.momentum = initial_momentum
         self.momentum_switch_iter = momentum_switch_iter # 250
-
         self.min_gain = 0.01
 
     def allocate_resources(self, n, no_dims):
@@ -27,6 +38,7 @@ class SGDOptimizer():
         self.learning_rate = learning_rate
         self.momentum = momemtum_object
         self.has_momemtum = momemtum_object != None
+        set_seed(42)
 
         if self.has_momemtum:
             self.take_step = lambda grad, iter: self.take_step_momemtum_gains(grad, iter)

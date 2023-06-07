@@ -6,6 +6,7 @@ from .utils.optimizer import SGDOptimizer
 from .utils.kernels import  distance_squared, summed_unscaled_student_t_prop_density
 from ..datasets.mnist import MNIST2KDataset, TripletMNIST2K
 from .utils.misc import to_torch_and_device
+import random
 
 if torch.cuda.is_available():
     print("set use cuda")
@@ -14,10 +15,20 @@ else:
     torch.set_default_tensor_type(torch.FloatTensor)
 
 # Added for reproducability
-np.random.seed(0)
+np.random.seed(42)
+
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
 
 class TSTE():
     def __init__(self, N, no_dims:int=2, optimizer:SGDOptimizer = SGDOptimizer(1)) -> None:
+        set_seed(42)
         self.epochs = 300
         self.no_dims = no_dims
         self.optim = optimizer

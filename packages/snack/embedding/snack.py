@@ -9,12 +9,23 @@ from ..datasets.mnist import MNIST2KDataset, TripletMNIST2K
 from sklearn.neighbors import NearestNeighbors
 from .utils.misc import to_torch_and_device
 from ..datamodule.metrics import post_hoc_metric_given_embedding_and_triplets
+import random
+
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
 
 # Added for reproducability
 np.random.seed(42)
 
 class SNaCK():
     def __init__(self, num_elements, no_dims:int=2, perplexity=30.0, contrib_cost_triplets=0.05, contrib_cost_tsne=10, optimizer:SGDOptimizer = SGDOptimizer(1), max_iter=1000, patience=5) -> None:
+        set_seed(42)
         self.tste_obj = TSTE(num_elements, no_dims, optimizer)
         self.tsne_obj = TSNE(no_dims, perplexity, optimizer)
 

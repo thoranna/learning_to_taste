@@ -2,6 +2,7 @@ import math
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
+np.random.seed(42)
 
 def euclidean_distance(point1, point2):
     """

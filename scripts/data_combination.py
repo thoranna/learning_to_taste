@@ -10,9 +10,7 @@ def combine_data(data1, data2, unique_ids1, unique_ids2, method, preprocessing_m
         cca.fit(data1, data2)
         data1_embeddings_aligned, data2_embeddings_aligned = cca.transform(data1, data2)
         # Assign weights
-        data1_embeddings_aligned = data1_embeddings_aligned * 0.2
-        data2_embeddings_aligned = data2_embeddings_aligned * 0.8
-        combined_embedding = np.concatenate((data1_embeddings_aligned, data2_embeddings_aligned), axis=1)
+        combined_embedding = np.hstack((data1_embeddings_aligned, data2_embeddings_aligned))
         if len(common_experiment_ids1) > len(common_experiment_ids2):
             return combined_embedding, common_experiment_ids2, data1, common_experiment_ids1, data2, common_experiment_ids2 
         else:
