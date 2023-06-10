@@ -47,19 +47,32 @@ tr.spaceUnder>td {
     position: relative;
     max-width: 100%;
 }
-    .figure img.image-hover {
-      position: absolute;
-      top: 0;
-      right: 0;
-      left: 0;
-      bottom: 0;
-      object-fit: contain;
-      opacity: 0;
-      transition: opacity .2s;
-    }
-    .figure:hover img.image-hover {
-      opacity: 1;
-    }
+.figure img.image-hover {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.figure:hover img.image-hover {
+  opacity: 1;
+}
+
+.img-container {
+  display: flex;
+  flex-wrap: wrap;
+  
+}
+
+.data-collection {
+  width: calc(25% - 6px);
+  min-width: 100px;
+  margin: 3px;
+
+}
 	
 	* {box-sizing:border-box}
 

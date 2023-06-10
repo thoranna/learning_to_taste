@@ -47,9 +47,9 @@
                     <br>
 	  	              <td align=center width=150px>
 	  					<center>
-							<span style="font-size:20px"><a href='https://arxiv.org/abs/2211.12498'> [Paper]</a></span>
+							<span style="font-size:20px"><a href=''> [Paper]</a></span>
 							&nbsp&nbsp&nbsp&nbsp&nbsp
-	  						<span style="font-size:20px"><a href='https://drive.google.com/drive/folders/1NDasyshDCL9aaQzxjn_-Q5MBURRT360B'> [Dataset]</a></span>
+	  						<span style="font-size:20px"><a href='https://figshare.com/s/5b7ec2ac2704fed39c1b'> [Dataset]</a></span>
 							  &nbsp&nbsp&nbsp&nbsp&nbsp
 	  						<span style="font-size:20px"><a href='https://github.com/thoranna/learning_to_taste'> [Code]</a></span>
 		  		  		</center>
@@ -69,6 +69,8 @@
 				<li><a href="#dataset">Dataset</a></li>
 				<li><a href="#applications">Applications</a></li>
 				<li><a href="#comparison">Comparison to Other Datasets</a></li>
+				<li><a href="#data-collection">Data collection</a></li>
+				<li><a href="#acknowledgements">Acknowledgements</a></li>
 			</ol>
 	</div>
     
@@ -89,16 +91,48 @@
 	</div>
 
 	<div class="content" id="dataset">
-	<table align=center width=850px>
-		<center><h1>Dataset</h1></center>
-	</table>
-	<center style="font-size:20px"><a href='https://drive.google.com/'> [Download Link]</a></center><br>
-	</div>
-	<div class="content" id="acknowledgements">
-		<center><h1>Acknowledgements</h1>
-		We thank the Danish Data Science Academy (DDSA) for their financial support. We also acknowledge Vivino for their assistance and resources.
-	</center>
-	</div>
+    <table align=center width=850px>
+      <center><h1>Dataset</h1></center>
+    </table>
+    <center style="font-size:20px"><a href='https://figshare.com/s/5b7ec2ac2704fed39c1b'> [Download Link]</a></center><br>
+  </div>
+
+
+  <div class="content" id="data-collection">
+    <table align=center width=850px>
+      <center><h1>Data collection</h1></center>
+    </table>
+    <div class="img-container">
+      <img src="images/data_collection_1.png" class="data-collection" alt="Unprocessed sample sheet">
+      <img src="images/data_collection_2.png" class="data-collection" alt="Sample sheet with corner detection and perspective warping">
+      <img src="images/data_collection_3.png" class="data-collection" alt="Sample sheet with blob detection and color classification">
+      <img src="images/data_collection_4.png" class="data-collection" alt="Euclidean distances between annotations">
+    </div>
+    <ol>
+        <li>
+          An unprocessed sample sheet with colored stickers representing the relative positions of the five different wines in the sample.
+        </li>
+        <li>
+          The corners of the sample sheet have been detected and used to perform perspective warping in order to correct for the angle and distance of the camera.
+        </li>
+        <li>
+          Blob detection has been performed on the perspective-corrected sample sheet and the color of each blob classified.
+        </li>
+        <li>
+          The Euclidean distance between each pair of labels is calculated.
+        </li>
+    </ol>
+  </div>
+
+
+  <div class="content" id="acknowledgements">
+      <center>
+        <h1>Acknowledgements</h1>
+        We thank the <a href="https://ddsa.dk" target="_blank">Danish Data Science Academy (DDSA)</a> for their financial support. We also acknowledge <a href="https://www.vivino.com" target="_blank">Vivino</a> for their assistance and resources.<br /><br />
+        This work was supported in part by the <a href="https://www.aicentre.dk" target="_blank">Pioneer Centre for AI</a>, DNRF grant number P1.<br /><br />
+        The webpage template was adopted from <a href="https://touch-and-go.github.io" target="_blank">Touch and Go</a> project.
+      </center>
+  </div>
 	
 	<hr>
 	<br><br><br>
