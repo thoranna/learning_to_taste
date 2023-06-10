@@ -1,0 +1,5 @@
+title: Your Project Name
+description: A short description of your project.
+baseurl: "" 
+url: "https://yourusername.github.io" # replace with your username
+theme: minima
