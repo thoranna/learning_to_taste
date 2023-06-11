@@ -15,24 +15,27 @@
 	<div class="content">
 		<br>
           <center>
-          	<span style="font-size:36px">Learning to taste 🍷: A Multimodal Wine Dataset</span>
+          	<span style="font-size:36px">Learning to Taste 🍷: A Multimodal Wine Dataset</span>
 			<br><br>
 	  		  <table align=center width=700px>
 	  			  <tr>
 	  	              <td align=center width=200px>
 	  					<center><span style="font-size:20px"><a href="https://www.linkedin.com/in/thoranna/">Thoranna Bender</a></span></center>
 		  		  	  </td>
-                        <td align=center width=200px>
-                            <center><span style="font-size:20px"><a href="https://www.linkedin.com/in/simon-moe-s%C3%B8rensen-9981a1127/">Simon Møe Søresen</a></span></center>
-                        </td>
-                        <td align=center width=200px>
-                            <center><span style="font-size:20px"><a href="https://www.linkedin.com/in/alirezakashani/?originalSubdomain=dk">Alireza Kashani</a></span></center>
-                        </td>
+                    <td align=center width=200px>
+                        <center><span style="font-size:20px"><a href="https://www.linkedin.com/in/simon-moe-s%C3%B8rensen-9981a1127/">Simon Møe Søresen</a></span></center>
+                    </td>
+                    <td align=center width=200px>
+                        <center><span style="font-size:20px"><a href="https://www.linkedin.com/in/alirezakashani/?originalSubdomain=dk">Alireza Kashani</a></span></center>
+                    </td>
+                    <td align=center width=200px>
+                        <center><span style="font-size:20px"><a href="https://www.linkedin.com/in/kreldjarn/">Kristjan Eldjarn</a></span></center>
+                    </td>
 			  </table>
 			  <table align=center width=700px>
 				  <tr>
                     <td align=center width=200px>
-                        <center><span style="font-size:20px"><a href="https://www.linkedin.com/in/kreldjarn/">Kristjan Eldjarn</a></span></center>
+                        <center><span style="font-size:20px"><a href="https://www.linkedin.com/in/kreldjarn/">Grethe Hyldig</a></span></center>
                     </td>
                     <td align=center width=200px>
                         <center><span style="font-size:20px"><a href="https://www.linkedin.com/in/hauberg/">Søren Haugberg</a></span></center>
@@ -64,17 +67,85 @@
             <img src="images/graphical_abstract.png" alt="A graphical overview of a shared latent space"  width="650">
         </center>
 		  <br> <br> 
+      <p>TLDR; We present WineSensed — a large multimodal wine dataset containing 897k images of wine labels and 824k reviews of wines curated from the <a href="https://www.vivino.com" target="_blank">Vivino</a> platform. It has over 350k unique vintages, annotated with year, region, rating, alcohol percentage, price, and grape composition. Last but not least, it contains flavor annotations on 108 wines from 256 non-experts, who were asked to rank wines based on their similarity in flavor, resulting in more than 5k pairwise flavor distances.
 		  <p><strong>Quick Jump:</strong></p>
 			<ol>
+				<li><a href="#data-collection">Data collection 👩‍💻</a></li>
 				<li><a href="#overview">Overview 👀</a></li>
 				<li><a href="#example-data">Examples from our Dataset 🧐</a></li>
 				<li><a href="#dataset-file-structure">Dataset file structure 💽</a></li>
-				<li><a href="#data-collection">Data collection 👩‍💻</a></li>
 				<li><a href="#media-coverage">Media coverage 🗞️</a></li>
 				<li><a href="#acknowledgements">Acknowledgements 🙏</a></li>
 			</ol>
 	</div>
     
+  <div class="content" id="data-collection">
+    <table align=center width=850px>
+      <center><h1>Data collection 👩‍💻</h1></center>
+    </table>
+    <p>The annotations in WineSensed were collected through a series of wine-tasting events attended by a total of 256 non-expert wine drinkers. Most participants were between 21-25 years old, and more than half of them were from Denmark. The experiment was conducted in accordance with the ''De Videnskabsetiske Komiteer'' (e. the Danish ethics committee for science).</p>
+
+
+
+
+    <div class="img-container">
+      <div class="data-collection">
+        <img src="images/data_collection_setup.png" alt="Anonymized wines, set up for tasting">
+        <p>
+          Anonymized wines, set up for a Napping-type data collection.
+        </p>
+      </div>
+      <div class="data-collection">
+        <img src="images/data_collection_labelling.png" alt="Each wine was labelled with a number and a color">
+        <p>
+          Each wine was labelled with a color and a number, and each participant was given a combination of wines to taste. In total, 108 different wines were used in the wine tastings.
+        </p>
+      </div>
+      <div class="data-collection">
+        <img src="images/data_collection_portions.png" alt="Decanted portions, ready for tasting">
+        <p>
+          The portions were 15 ml each, such that each participant could taste five different wines up to three times, and still consume less than two glasses of wine.
+        </p>
+      </div>
+      <div class="data-collection">
+        <img src="images/data_collection_instructions.png" alt="Instructions for participants">
+        <p>
+          The participants were given instructions as to how to conduct the wine tasting, and palate cleansers were available.
+        </p>
+      </div>
+    </div>
+      
+    <p>We randomly selected 5 wines for the participants to taste. The participants did not have access to any information regarding the individual wines. The wine was poured into non-transparent shot glasses and the labels of the wines were covered during the entire experiment. The participants were instructed to put colored stickers (representing each of the five wines) on a sheet of paper based on their taste similarity, closer meaning more similar. The participants could repeat the process up to three times, ensuring they did not consume more than 225 ml of wine. The average participant repeated the experiment two times.</p>
+
+    <div class="img-container">
+      <div class="data-collection">
+        <img src="images/data_collection_1.png" alt="Unprocessed sample sheet">
+        <p>
+          An unprocessed sample sheet with colored stickers representing the relative positions of the five different wines in the sample.
+        </p>
+      </div>
+      <div class="data-collection">
+        <img src="images/data_collection_2.png" alt="Sample sheet with corner detection and perspective warping">
+        <p>
+          The corners of the sample sheet have been detected and used to perform perspective warping in order to correct for the angle and distance of the camera.
+        </p>
+      </div>
+      <div class="data-collection">
+        <img src="images/data_collection_3.png" alt="Sample sheet with blob detection and color classification">
+        <p>
+          Blob detection has been performed on the perspective-corrected sample sheet and the color of each blob classified.
+        </p>
+      </div>
+      <div class="data-collection">
+        <img src="images/data_collection_4.png" alt="Euclidean distances between annotations">
+        <p>
+          The Euclidean distance between each pair of labels is calculated.
+        </p>
+      </div>
+    </div>
+      <p>We automatically digitized the participants' annotations by taking a photo of each filled-out sheet. We used the <a href="http://www.bmva.org/bmvc/1988/avc-88-023.pdf" target="_blank">Harris corner detector</a> to find the corners of the paper and a homographic projection to obtain an aligned top-down view of the paper. The images were mapped into HSV color space and a threshold filter applied to find the different colored stickers that the participant used to represent the wines. Having identified the location, we computed the Euclidean pixel-wise distance between all pairs of points, resulting in a distance matrix of wine similarities.</p>
+      <br />
+  </div>
 
 	<div class="content" id="overview">
 		<center>
@@ -307,61 +378,6 @@ e is buttery giving way to red cherries, a bit of herbaceous bitterness like bel
   </div>
 
 
-  <div class="content" id="data-collection">
-    <table align=center width=850px>
-      <center><h1>Data collection 👩‍💻</h1></center>
-    </table>
-    <p>The annotations in WineSensed were collected through a series of wine-tasting events attended by a total of 256 non-expert wine drinkers. Most participants were between 21-25 years old, and more than half of them were from Denmark. The experiment was conducted in accordance with the ''De Videnskabsetiske Komiteer'' (e. the Danish ethics committee for science).</p>
-
-
-
-
-    <div class="img-container">
-      <img src="images/data_collection_setup.png" class="data-collection" alt="Anonymized wines, set up for tasting">
-      <img src="images/data_collection_labelling.png" class="data-collection" alt="Each wine was labelled with a number and a color">
-      <img src="images/data_collection_portions.png" class="data-collection" alt="Decanted portions, ready for tasting">
-      <img src="images/data_collection_instructions.png" class="data-collection" alt="Instructions for participants">
-    </div>
-    <ol>
-        <li>
-          Anonymized wines, set up for a Napping-type data collection.
-        </li>
-        <li>
-          Each wine was labelled with a color and a number, and each participant was given a combination of wines to taste. In total, 108 different wines were used in the wine tastings.
-        </li>
-        <li>
-          The portions were 15 ml each, such that each participant could taste five different wines up to three times, and still consume less than two glasses of wine.
-        </li>
-        <li>
-          The participants were given instructions as to how to conduct the wine tasting, and palate cleansers were available.
-        </li>
-    </ol>
-      
-    <p>We randomly selected 5 wines for the participants to taste. The participants did not have access to any information regarding the individual wines. The wine was poured into non-transparent shot glasses and the labels of the wines were covered during the entire experiment. The participants were instructed to put colored stickers (representing each of the five wines) on a sheet of paper based on their taste similarity, closer meaning more similar. The participants could repeat the process up to three times, ensuring they did not consume more than 225 ml of wine. The average participant repeated the experiment two times.</p>
-
-    <div class="img-container">
-      <img src="images/data_collection_1.png" class="data-collection" alt="Unprocessed sample sheet">
-      <img src="images/data_collection_2.png" class="data-collection" alt="Sample sheet with corner detection and perspective warping">
-      <img src="images/data_collection_3.png" class="data-collection" alt="Sample sheet with blob detection and color classification">
-      <img src="images/data_collection_4.png" class="data-collection" alt="Euclidean distances between annotations">
-    </div>
-    <ol>
-        <li>
-          An unprocessed sample sheet with colored stickers representing the relative positions of the five different wines in the sample.
-        </li>
-        <li>
-          The corners of the sample sheet have been detected and used to perform perspective warping in order to correct for the angle and distance of the camera.
-        </li>
-        <li>
-          Blob detection has been performed on the perspective-corrected sample sheet and the color of each blob classified.
-        </li>
-        <li>
-          The Euclidean distance between each pair of labels is calculated.
-        </li>
-    </ol>
-      <p>We automatically digitized the participants' annotations by taking a photo of each filled-out sheet. We used the <a href="http://www.bmva.org/bmvc/1988/avc-88-023.pdf" target="_blank">Harris corner detector</a> to find the corners of the paper and a homographic projection to obtain an aligned top-down view of the paper. The images were mapped into HSV color space and a threshold filter applied to find the different colored stickers that the participant used to represent the wines. Having identified the location, we computed the Euclidean pixel-wise distance between all pairs of points, resulting in a distance matrix of wine similarities.</p>
-      <br />
-  </div>
 
   <div class="content" id="media-coverage">
       <center>

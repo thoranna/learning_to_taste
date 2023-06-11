@@ -94,7 +94,14 @@ tr.spaceUnder>td {
   width: calc(25% - 6px);
   min-width: 100px;
   margin: 3px;
+}
 
+.data-collection img {
+  width: 100%;
+}
+
+.data-collection p {
+  font-size: 0.7em;
 }
 	
 	* {box-sizing:border-box}
