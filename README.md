@@ -18,27 +18,36 @@ python3 -m pip install -r requirements.txt
 
 This command will install all the necessary libraries listed in the requirements.txt file.
 
-## Running the Program
-Once you have installed the dependencies, you can run the program. The project consists of two main scripts: `run_experiments.py` and `run_taste_space_evaluation.py`.
+### External packages
+We utilize three external github repositories as packages for this project: 
 
-To run the experiments, use the following command:
+ICP from https://github.com/richardos/icp 
+t-STE from https://github.com/gcr/tste-theano
+Implementation of SNaCK from https://github.com/captainE/Searching-for-Structure-in-Unfalsifiable-Claims
+
+The code for these projects can be found in the ```packages``` folder. 
+
+## Running the Program
+Once you have installed the dependencies, you can run the program. The experiments consist of two main scripts: `run_classification.py` and `run_tar.py`.
+
+To run the coarse flavor prediction experiment, use the following command:
 
 ```bash
-python3 -m run_experiments
+python3 -m run_classification
 ```
 
 This script will conduct a series of experiments based on predefined parameters and configurations. The results will be stored in a specified directory for further analysis.
 
-To run the taste space evaluation, use the following command:
+To run the fine-grained flavor prediction experiment, use the following command:
 
 ```bash
-python3 -m run_taste_space_evaluation
+python3 -m run_tar
 ```
 
 This script evaluates the model's performance in predicting and understanding taste profiles. It generates a report that summarizes the model's accuracy and its understanding of the taste space.
 
 ## Output
-The output of these scripts will be a series of files containing the results of the experiments and the taste space evaluation. You can analyze these files to understand how well the model performs, see patterns in the data, and gain insights into the world of tastes.
+The output of these scripts will be a series of files containing the results of the experiments and the taste space evaluation. You can analyze these files to understand how well the models and different combinations of methods perform. 
 
 ## Contribution
 Contributions to this project are welcome. If you find a bug or want to propose a feature, feel free to open an issue or submit a pull request.
