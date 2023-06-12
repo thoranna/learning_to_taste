@@ -22,10 +22,12 @@ This command will install all the necessary libraries listed in the requirements
 We utilize three external github repositories as packages for this project: 
 
 ICP from https://github.com/richardos/icp 
+
 t-STE from https://github.com/gcr/tste-theano
+
 Implementation of SNaCK from https://github.com/captainE/Searching-for-Structure-in-Unfalsifiable-Claims
 
-The code for these projects can be found in the ```packages``` folder. 
+The code we utilize from these projects can be found in the ```packages``` folder. 
 
 ## Running the Program
 Once you have installed the dependencies, you can run the program. The experiments consist of two main scripts: `run_classification.py` and `run_tar.py`.
