@@ -1,7 +1,7 @@
 # Learning to Taste
 Can machines learn how to taste? 🍷
 
-This project is developed and tested on macOS and utilizes Python 3.11.
+This project is developed and tested on macOS and uses Python 3.11.
 
 ## Operating System
 This software was developed and tested on macOS. While it is not specifically designed for other operating systems, it may work on Linux or Windows with minor modifications.
