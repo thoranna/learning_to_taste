@@ -5,11 +5,23 @@
 <html>
     <head>
 		<title>Learning To Taste</title>
+        <!-- favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>:wine_glass:</text></svg>">
         <meta property="og:title" content="Learning To Taste" />
         <meta name="robots" content="noindex" />
+        <meta content="Learning to Taste :wine_glass:: A Multimodal Wine Dataset" name="description" />
+        <meta content="Learning to Taste :wine_glass:: A Multimodal Wine Dataset" property="og:title" />
+        <meta content="Learning to Taste :wine_glass:: A Multimodal Wine Dataset" property="og:description" />
+        <meta content="https://thoranna.github.io/learning_to_taste/images/graphical_abstract.png" property="og:image" />
+        <meta content="Learning to Taste :wine_glass:: A Multimodal Wine Dataset" property="twitter:title" />
+        <meta content="Learning to Taste :wine_glass:: A Multimodal Wine Dataset" property="twitter:description" />
+        <meta content="https://thoranna.github.io/learning_to_taste/images/graphical_abstract.png" property="twitter:image" />
+        <meta property="og:type" content="website" />
+        <meta content="summary_large_image" name="twitter:card" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
         <link href="https://fonts.cdnfonts.com/css/jetbrains-mono-2" rel="stylesheet">
         <style> @import url('https://fonts.cdnfonts.com/css/jetbrains-mono-2'); </style>
-        <link rel="stylesheet" href="css/style.css">
+        <!-- <link rel="stylesheet" href="css/style.css"> -->
     </head>
     <body>
 	<div class="content">
@@ -23,7 +35,7 @@
 	  					<center><span style="font-size:20px"><a href="https://www.linkedin.com/in/thoranna/">Thoranna Bender</a></span></center>
 		  		  	  </td>
                     <td align=center width=200px>
-                        <center><span style="font-size:20px"><a href="https://www.linkedin.com/in/simon-moe-s%C3%B8rensen-9981a1127/">Simon Møe Søresen</a></span></center>
+                        <center><span style="font-size:20px"><a href="https://www.linkedin.com/in/simon-moe-s%C3%B8rensen-9981a1127/">Simon Moe Søresen</a></span></center>
                     </td>
                     <td align=center width=200px>
                         <center><span style="font-size:20px"><a href="https://www.linkedin.com/in/alirezakashani/?originalSubdomain=dk">Alireza Kashani</a></span></center>
@@ -38,7 +50,7 @@
                         <center><span style="font-size:20px"><a href="https://www.linkedin.com/in/kreldjarn/">Grethe Hyldig</a></span></center>
                     </td>
                     <td align=center width=200px>
-                        <center><span style="font-size:20px"><a href="https://www.linkedin.com/in/hauberg/">Søren Haugberg</a></span></center>
+                        <center><span style="font-size:20px"><a href="https://www.linkedin.com/in/hauberg/">Søren Hauberg</a></span></center>
                     </td>
                     <td align=center width=200px>
                         <center><span style="font-size:20px"><a href="https://www.linkedin.com/in/sergebelongie/?originalSubdomain=dk">Serge Belongie</a></span></center>
@@ -67,12 +79,12 @@
             <img src="images/graphical_abstract.png" alt="A graphical overview of a shared latent space"  width="650">
         </center>
 		  <br> <br> 
-      <p>TLDR; We present WineSensed — a large multimodal wine dataset containing 897k images of wine labels and 824k reviews of wines curated from the <a href="https://www.vivino.com" target="_blank">Vivino</a> platform. It has over 350k unique vintages, annotated with year, region, rating, alcohol percentage, price, and grape composition. Last but not least, it contains flavor annotations on 108 wines from 256 non-experts, who were asked to rank wines based on their similarity in flavor, resulting in more than 5k pairwise flavor distances.
+      <p>TL;DR: We present a large multimodal flavor dataset and propose to add flavor as a modality for multimodal representation learning.
 		  <p><strong>Quick Jump:</strong></p>
 			<ol>
 				<li><a href="#data-collection">Data collection 👩‍💻</a></li>
 				<li><a href="#overview">Overview 👀</a></li>
-				<li><a href="#example-data">Examples from our Dataset 🧐</a></li>
+				<li><a href="#example-data">Examples from WineSensed 🧐</a></li>
 				<li><a href="#dataset-file-structure">Dataset file structure 💽</a></li>
 				<li><a href="#media-coverage">Media coverage 🗞️</a></li>
 				<li><a href="#acknowledgements">Acknowledgements 🙏</a></li>
@@ -165,7 +177,7 @@
 
   <div class="content" id="example-data">
       <center>
-        <h1>Examples from our Dataset 🧐</h1>
+        <h1>Examples from WineSensed 🧐</h1>
       </center>
 
       <center>
@@ -401,7 +413,7 @@ e is buttery giving way to red cherries, a bit of herbaceous bitterness like bel
 	
 	<hr>
 	<br><br><br>
-	<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms" href="http://purl.org/dc/dcmitype/MovingImage" property="dct:title" rel="dct:type">WineSensed</span> by <span xmlns:cc=“http://creativecommons.org/ns#” property=“cc:attributionName”>Thoranna Bender, Simon Søresen, Alireza Kashani, Kristjan Eldjarn, Grethe Hyldig, Søren Haugberg, Serge Belongie, Frederik Warburg </span> is licensed under a <a rel=“license” href=“http://creativecommons.org/licenses/by/4.0/”>Creative Commons Attribution 4.0 International License</a>
+	<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms" href="http://purl.org/dc/dcmitype/MovingImage" property="dct:title" rel="dct:type">WineSensed</span> by <span xmlns:cc=“http://creativecommons.org/ns#” property=“cc:attributionName”>Thoranna Bender, Simon Søresen, Alireza Kashani, Kristjan Eldjarn, Grethe Hyldig, Søren Hauberg, Serge Belongie, Frederik Warburg </span> is licensed under a <a rel=“license” href=“http://creativecommons.org/licenses/by/4.0/”>Creative Commons Attribution 4.0 International License</a>
 	
 </body>
 </html>
