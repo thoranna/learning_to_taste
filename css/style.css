@@ -40,6 +40,20 @@ a {
   color: #abcdef;
 }
 
+pre code {
+  display: block;
+  background: none;
+  white-space: pre;
+  -webkit-overflow-scrolling: touch;
+  overflow-x: scroll;
+  max-width: 100%;
+  min-width: 100px;
+  padding: 0;
+  color: #3FFDAB;
+  font-family: 'JetBrains Mono', sans-serif;
+  font-weight: 200;
+}
+
 img.thumbnail {
   width: 100%;
   display: inline;
