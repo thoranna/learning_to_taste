@@ -226,12 +226,12 @@ if __name__ == "__main__":
                             test_triplets = generate_triplets(test_d1, test_d1_labels)
                             triplets_combined_embed = generate_triplets(combined_embed, al_ids2)
 
-                        ratio, n = agreement_ratio(triplets_combined_embed, test_triplets)
+                        ratio = agreement_ratio(triplets_combined_embed, test_triplets)
                         print("TAR: ", ratio)
                         # CHECKING FOR MACHINE KERNEL ONLY
                         m = fit_combine_machine_kernel(al_d2_dist_b, d2_p)
                         triplets_machine_embed = generate_triplets(m, al_ids2)
                         t1, t2 = remove_overlap(al_d1_triplets, triplets_machine_embed)
-                        print("TAR MACHINE KERNEL: ", agreement_ratio(t1, t2, n))
+                        print("TAR MACHINE KERNEL: ", agreement_ratio(t1, t2))
 
         sys.stdout = original_stdout

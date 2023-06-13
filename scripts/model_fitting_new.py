@@ -1,12 +1,10 @@
 import torch
 import numpy as np
 from transformers import T5EncoderModel, AutoTokenizer, AlbertTokenizer, AlbertModel, \
-    BartTokenizer, BartModel, PegasusTokenizer, PegasusForConditionalGeneration, \
-    AutoModel, CLIPModel, AutoImageProcessor, ViTModel, DeiTModel, ResNetModel
+    BartTokenizer, BartModel, AutoModel, CLIPModel, AutoImageProcessor, ViTModel, DeiTModel, ResNetModel
 from transformers import CLIPProcessor, CLIPModel
 from transformers import AutoTokenizer, CLIPTextModel
 from transformers import AutoProcessor, CLIPVisionModel
-from torchvision import models
 import torchvision.transforms.functional as F
 from torchvision import transforms
 import PIL
@@ -49,15 +47,8 @@ def set_deterministic(seed=42):
     # Transformers
     set_seed(seed)
 
-# Apple support 
-# if torch.backends.mps.is_available():
-#     device = torch.device("mps")
-# else:
-#     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-# Default to cpu for now
+# Default to cpu
 device = 'cpu'
-MAX_IMG_SAMPLES = 100
 
 def fit_model(model_to_fit, data):
     set_deterministic(42)
@@ -125,10 +116,8 @@ def fit_model(model_to_fit, data):
             print("i: ", i)
             print("total: ", len(unique_experiment_ids))
             idx = (experiment_ids == experiment_id)
-            print("this is model: ", model_to_fit)
             if model_to_fit in text_models:
                 vintage_reviews = reviews[idx]
-                print("num reviews: ", len(vintage_reviews))
                 vintage_embedding = create_vintage_embedding_text(model=model,
                                                                   vintage_ids=[experiment_id] * len(vintage_reviews),
                                                                   reviews=vintage_reviews,
@@ -149,6 +138,7 @@ def fit_model(model_to_fit, data):
             elif model_to_fit in image_models:
                 vintage_image_files = image_files[idx]
                 try:
+                    MAX_IMG_SAMPLES = 100
                     vintage_image_files = random.sample(list(vintage_image_files), MAX_IMG_SAMPLES)
                 except: 
                     vintage_image_files = list(vintage_image_files)
@@ -196,6 +186,7 @@ def fit_model(model_to_fit, data):
                     device=device).mean(axis=0)
                 # For images
                 try:
+                    MAX_IMG_SAMPLES = 100
                     vintage_image_files = random.sample(list(vintage_image_files), MAX_IMG_SAMPLES)
                 except: 
                     vintage_image_files = list(vintage_image_files)
@@ -222,8 +213,6 @@ def fit_model(model_to_fit, data):
     
         # At the end, load all embeddings at once as a memmap array
         embedding_matrix = hf["mean_embeddings"][:]
-        print("this is the shape of the embedding matrix on return: ")
-        print(embedding_matrix.shape)
         if model_to_fit == 'resnet':
             embedding_matrix = embedding_matrix.reshape((embedding_matrix.shape[0], -1))
         return embedding_matrix, unique_experiment_ids
@@ -267,7 +256,6 @@ def download_process_delete_images(urls, model, model_name, device, feature_extr
                             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                         ])
                         img_tensor = preprocess(img).unsqueeze(0).to(device)  # Add batch dimension and move to device
-                        print("this is the model: ", model_name)
                         if model_name == 'clip_image':
                             outputs = model(img_tensor)
                             emb = outputs.last_hidden_state.mean(dim=1).detach().numpy()

@@ -98,15 +98,13 @@ def fit_model(model_name, data):
 
 
 def download_process_delete_images(model, urls, reviews, processor, device, batch_size=10, embedding_dim=512, embedding_path='embeddings.hdf5'):
-    with h5py.File(embedding_path, 'a') as hf: 
-        print("in here")       
+    with h5py.File(embedding_path, 'a') as hf:    
         if "embeddings" not in hf:
             hf.create_dataset("embeddings", data=np.empty((0, embedding_dim)), maxshape=(None, embedding_dim))
         for batch_start in range(0, len(urls), batch_size):
             batch_urls = urls[batch_start: batch_start + batch_size]
             batch_reviews = reviews[batch_start: batch_start + batch_size]
             for i, url in enumerate(batch_urls):
-                # print("this is the url: ", url)
                 if pd.isnull(url):
                     emb = torch.zeros((1, embedding_dim)).to(device)
                 else:

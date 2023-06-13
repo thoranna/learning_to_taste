@@ -46,7 +46,7 @@ def create_csv_row(
     return row
 
 # Define the combinations of methods to try
-preprocessing_methods1 = ['euclidean',
+preprocessing_methods1 = [# 'euclidean',
                           'triplets']
 dimensionality_reduction_methods2 = ['TSNE', 'PCA', 'Umap']
 data_combination_methods = ['CCA', 'ICP', 'SNaCK']
@@ -78,15 +78,15 @@ csv_header = ["preprocessing_method1", "model", "dimensionality_reduction_method
               "AVERAGE_COMBINED_ACCURACY", "AVERAGE_COMBINED_F1", "AVERAGE_D2_F1", 
               "time", "memory", "cpu_percent"]
 
-csv_file_path = "results/results1000.csv"
-#with open(csv_file_path, "w", newline="") as csvfile:
-#    csv_writer = csv.writer(csvfile)
-#    csv_writer.writerow(csv_header)
+csv_file_path = "results/results.csv"
+with open(csv_file_path, "w", newline="") as csvfile:
+  csv_writer = csv.writer(csvfile)
+  csv_writer.writerow(csv_header)
 
-csv_file_path_rand = "results/results_random1000.csv"
-#with open(csv_file_path_rand, "w", newline="") as csvfile:
-#    csv_writer = csv.writer(csvfile)
-#    csv_writer.writerow(csv_header)
+csv_file_path_rand = "results/results_random.csv"
+with open(csv_file_path_rand, "w", newline="") as csvfile:
+  csv_writer = csv.writer(csvfile)
+  csv_writer.writerow(csv_header)
 
 # Iterate over combinations of methods
 num = 0

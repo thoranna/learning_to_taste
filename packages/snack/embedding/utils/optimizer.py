@@ -12,7 +12,7 @@ def set_seed(seed):
         torch.backends.cudnn.benchmark = False
 
 class TSNEMomentum():
-    def __init__(self, initial_momentum=0.5,final_momentum=0.8, momentum_switch_iter=20 ) -> None:
+    def __init__(self, initial_momentum=0.5, final_momentum=0.8, momentum_switch_iter=20 ) -> None:
         set_seed(42)
         self.final_momentum = final_momentum
         self.momentum = initial_momentum
