@@ -9,6 +9,7 @@ from umap import UMAP
 from imblearn.over_sampling import RandomOverSampler
 from scripts.prediction import DICTIONARIES
 import statistics
+from utils.set_seed import RANDOM_SEED
 
 
 def reduce_data1(data, method, ids):
@@ -32,13 +33,13 @@ def reduce_data1(data, method, ids):
 
 def reduce_data2(data, method, ids):
     if method == 'TSNE':
-        tsne = TSNE(n_components=2, random_state=42)
+        tsne = TSNE(n_components=2, random_state=RANDOM_SEED)
         return tsne.fit_transform(data)
     elif method == 'PCA':
-        pca = PCA(n_components=2, random_state=42)
+        pca = PCA(n_components=2, random_state=RANDOM_SEED)
         return pca.fit_transform(data)
     elif method == 'Umap':
-        umap = UMAP(n_components=2, random_state=42)
+        umap = UMAP(n_components=2, random_state=RANDOM_SEED)
         return umap.fit_transform(data)
 
 def find_optimal_mds(dist_matrix, labels, n_inits, max_iters, eps_values, cv=5):
@@ -53,7 +54,7 @@ def find_optimal_mds(dist_matrix, labels, n_inits, max_iters, eps_values, cv=5):
         for max_iter in max_iters:
             for eps in eps_values:
                 # Create MDS with the current parameters
-                mds = MDS(n_components=2, metric=False, dissimilarity='precomputed', random_state=42, n_init=n_init, max_iter=max_iter, eps=eps)
+                mds = MDS(n_components=2, metric=False, dissimilarity='precomputed', random_state=RANDOM_SEED, n_init=n_init, max_iter=max_iter, eps=eps)
 
                 # Obtain embeddings using MDS
                 embeddings = mds.fit_transform(dist_matrix)

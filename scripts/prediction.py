@@ -1,5 +1,4 @@
 from sklearn.preprocessing import LabelEncoder
-from sklearn.neighbors import KNeighborsClassifier
 from imblearn.over_sampling import RandomOverSampler
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.multiclass import OneVsRestClassifier
@@ -13,6 +12,7 @@ from sklearn.metrics import f1_score
 from collections import Counter
 from sklearn.dummy import DummyClassifier
 import numpy as np
+from utils.set_seed import RANDOM_SEED
 
 RIBENA = False
 
@@ -37,7 +37,7 @@ def single_label(data_embedding, experiment_ids, d):
     for train_index, test_index in kf.split(data_source, labels):
         X_train, X_test = data_source[train_index], data_source[test_index]
         y_train, y_test = labels[train_index], labels[test_index]
-        ru = RandomOverSampler(sampling_strategy='not majority', random_state=42)
+        ru = RandomOverSampler(sampling_strategy='not majority', random_state=RANDOM_SEED)
         X_res, y_res = ru.fit_resample(X_train, y_train)
 
         clf = SVC(random_state=42, class_weight='balanced')
@@ -49,7 +49,7 @@ def single_label(data_embedding, experiment_ids, d):
         f1_scores.append(f1)
         
         # Establishing a dummy classifier as a baseline
-        dummy_clf = DummyClassifier(strategy="stratified", random_state=42)
+        dummy_clf = DummyClassifier(strategy="stratified", random_state=RANDOM_SEED)
         dummy_clf.fit(X_res, y_res)
         y_pred = dummy_clf.predict(X_test)
         shuffled_score = round(dummy_clf.score(X_test, y_test), 2)
@@ -75,7 +75,6 @@ def get_multi_labels(dictionaries, ids):
 
 def multi_label(data_embedding, experiment_ids, dictionaries):
     labels = get_multi_labels(dictionaries, experiment_ids)
-    label_counts = Counter(tuple(x) for x in labels)  # count tuple of labels
     mlb = MultiLabelBinarizer()
     transformed_labels = mlb.fit_transform(labels)
     print(transformed_labels)
@@ -83,7 +82,7 @@ def multi_label(data_embedding, experiment_ids, dictionaries):
     print(data_embedding)
     
     filtered_data = [(label, id, vector) for label, id, vector in zip(transformed_labels, experiment_ids, data_embedding)]
-    labels, ids, data_source = zip(*filtered_data)
+    labels, _, data_source = zip(*filtered_data)
     
     data_source = np.array(data_source)
     labels = np.array(labels)
@@ -98,7 +97,7 @@ def multi_label(data_embedding, experiment_ids, dictionaries):
         X_train, X_test = data_source[train_index], data_source[test_index]
         y_train, y_test = labels[train_index], labels[test_index]
 
-        clf = OneVsRestClassifier(SVC(random_state=42, class_weight='balanced'))
+        clf = OneVsRestClassifier(SVC(random_state=RANDOM_SEED, class_weight='balanced'))
         clf.fit(X_train, y_train)
         y_pred = clf.predict(X_test)
         score = round(clf.score(X_test, y_test), 2)
@@ -107,7 +106,7 @@ def multi_label(data_embedding, experiment_ids, dictionaries):
         f1_scores.append(f1)
         
         # Create a dummy classifier as a baseline
-        dummy_clf = DummyClassifier(strategy="stratified", random_state=42)
+        dummy_clf = DummyClassifier(strategy="stratified", random_state=RANDOM_SEED)
         dummy_clf.fit(X_train, y_train)
         y_pred = dummy_clf.predict(X_test)
         shuffled_score = round(dummy_clf.score(X_test, y_test), 2)
@@ -221,8 +220,8 @@ def predict_classes(data1_embedding, data2_embedding, combined_embedding, data1_
                         "shuffled": {"accuracy": avg_shuffled_combined_acc,
                                      "f1_score": avg_shuffled_combined_f1,
                                      "f1_score_d2": avg_shuffled_data2_f1}}
-    print("increment report: ", increment_report)
-    print("shuffled increment report: ", shuffled_increment_report)
+    print("Increment report: ", increment_report)
+    print("Shuffled increment report: ", shuffled_increment_report)
     print("Report: ", report)
     print("Shuffled report: ", shuffled_report)
     print("Incrementation report: ", increment_report)

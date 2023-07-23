@@ -17,6 +17,7 @@ import torch
 import torch.nn as nn
 import h5py
 from transformers import set_seed
+from utils.set_seed import RANDOM_SEED
 
 def set_deterministic(seed=42):
     # Python
@@ -45,7 +46,7 @@ device = 'cpu'
 MAX_IMG_SAMPLES = 100
 
 def fit_model(model_name, data):
-    set_deterministic(seed=42)
+    set_deterministic(seed=RANDOM_SEED)
     processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
     model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
     model = model.to(device)

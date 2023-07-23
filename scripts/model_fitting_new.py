@@ -20,6 +20,7 @@ import random
 import torch
 import h5py
 from transformers import set_seed
+from utils.set_seed import RANDOM_SEED
 
 # You might need to download the stopwords first
 nltk.download('punkt')
@@ -51,7 +52,7 @@ def set_deterministic(seed=42):
 device = 'cpu'
 
 def fit_model(model_to_fit, data):
-    set_deterministic(42)
+    set_deterministic(RANDOM_SEED)
     # TEXT
     if model_to_fit == 't5_small':
         model_name = 't5-small'
