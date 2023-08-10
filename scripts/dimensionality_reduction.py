@@ -30,6 +30,9 @@ def reduce_data1(data, method, ids):
         return optimal_mds.fit_transform(data)
     elif method == 't-STE':
         return tste(np.array(data))
+    elif method == 'TSNE':
+        tsne = TSNE(n_components=2, random_state=RANDOM_SEED)
+        return tsne.fit_transform(data)
 
 def reduce_data2(data, method, ids):
     if method == 'TSNE':
@@ -75,5 +78,5 @@ def find_optimal_mds(dist_matrix, labels, n_inits, max_iters, eps_values, cv=5):
                     best_params = {'n_init': n_init, 'max_iter': max_iter, 'eps': eps}
 
     # Create and return an MDS object with the optimal parameters
-    optimal_mds = MDS(n_components=2, metric=False, dissimilarity='precomputed', random_state=42, **best_params)
+    optimal_mds = MDS(n_components=2, metric=False, dissimilarity='precomputed', random_state=RANDOM_SEED, **best_params)
     return optimal_mds

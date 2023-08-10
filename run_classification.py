@@ -12,11 +12,19 @@ import csv
 import time
 import psutil
 import os
+import pickle
+import os
+import time
+import psutil
 
 start = time.time()
 pid = os.getpid()
 py = psutil.Process(pid)
 memory_use_before = py.memory_info()[0] / 2. ** 30  # Memory use in GB
+
+# Define a function to create a unique filename for each combination of preprocessing and model
+def create_filename(model_name):
+    return f"embeddings_{model_name}.pkl"
 
 def create_csv_row(
         preprocessing_method1,
@@ -46,18 +54,22 @@ def create_csv_row(
     return row
 
 # Define the combinations of methods to try
-preprocessing_methods1 = [# 'euclidean',
-                          'triplets']
-dimensionality_reduction_methods2 = ['TSNE', 'PCA', 'Umap']
-data_combination_methods = ['CCA', 'ICP', 'SNaCK']
+preprocessing_methods1 = ['graph','euclidean'] # ,
+                          # 'triplets']
+dimensionality_reduction_methods2 = ['TSNE']
+                                     # , 'PCA', 'Umap']
+data_combination_methods = ['CCA', 'procrustes', 'ICP', 'SNaCK']
 
 # TEXT: 
-models_to_use_text = ['distil_bert', 't5_small', 'albert', 'bart', 'clip_text']
+# models_to_use_text = ['distil_bert', 't5_small', 'albert', 'bart', 'clip_text']
+# NOTE: testing additional models
+models_to_use_text = ['pegasus', 'bart_large', 'flan_t5', 'distil_bert', 't5_small', 'albert', 'bart', 'clip_text']
 # IMAGES: 
 models_to_use_images = ['vit_base', 'deit_small', 'resnet', 'clip_image']
 # IMAGES AND TEXT: 
 models_to_use_multi = ['clip']
-models_to_use = models_to_use_images + models_to_use_text + models_to_use_multi
+# models_to_use = models_to_use_images + models_to_use_text + models_to_use_multi
+models_to_use = models_to_use_multi + models_to_use_text + models_to_use_images
 
 # Load data
 data_source1a, data_source1b = data_source1_utils.load_data()
@@ -78,12 +90,12 @@ csv_header = ["preprocessing_method1", "model", "dimensionality_reduction_method
               "AVERAGE_COMBINED_ACCURACY", "AVERAGE_COMBINED_F1", "AVERAGE_D2_F1", 
               "time", "memory", "cpu_percent"]
 
-csv_file_path = "results/results.csv"
+csv_file_path = "results/results_new_models_MLP4.csv"
 with open(csv_file_path, "w", newline="") as csvfile:
   csv_writer = csv.writer(csvfile)
   csv_writer.writerow(csv_header)
 
-csv_file_path_rand = "results/results_random.csv"
+csv_file_path_rand = "results/results_random_MLP.csv"
 with open(csv_file_path_rand, "w", newline="") as csvfile:
   csv_writer = csv.writer(csvfile)
   csv_writer.writerow(csv_header)
@@ -97,20 +109,77 @@ for preprocessing_method1 in preprocessing_methods1:
     _memory_use_before = _py.memory_info()[0] / 2. ** 30  # Memory use in GB
     print("preprocessing_method1: ", preprocessing_method1)
     if preprocessing_method1 == 'euclidean':
+        filename = create_filename(preprocessing_method1)
         preprocessed_data1, unique_ids1, index_to_id = preprocessing.preprocess_data_source1(data_source1a, data_source1b, method=preprocessing_method1)
         unique_ids1 = [int(item) for item in  unique_ids1]
-        dimensionality_reduction_method1 = 'MDS'
-        reduced_embeddings1 = dimensionality_reduction.reduce_data1(preprocessed_data1, method=dimensionality_reduction_method1, ids=unique_ids1)
+        if os.path.exists(filename):
+            # Load embeddings from disk
+            with open(filename, 'rb') as f:
+                reduced_embeddings1 = pickle.load(f)
+            dimensionality_reduction_method1 = 'MDS'
+            print(f"Loaded embeddings for {preprocessing_method1} from disk.")
+        else:
+            dimensionality_reduction_method1 = 'MDS'
+            reduced_embeddings1 = dimensionality_reduction.reduce_data1(preprocessed_data1, method=dimensionality_reduction_method1, ids=unique_ids1)
+            # Save embeddings to disk
+            with open(filename, 'wb') as f:
+                pickle.dump((reduced_embeddings1), f)
     elif preprocessing_method1 == 'triplets':
         preprocessed_data1, unique_ids1, _ = preprocessing.preprocess_data_source1(data_source1a, data_source1b, method=preprocessing_method1)
-        dimensionality_reduction_method1 = 't-STE'
-        reduced_embeddings1 = dimensionality_reduction.reduce_data1(preprocessed_data1, method=dimensionality_reduction_method1, ids=unique_ids1)
+        filename = create_filename(preprocessing_method1)
+        if os.path.exists(filename):
+            # Load embeddings from disk
+            with open(filename, 'rb') as f:
+                reduced_embeddings1 = pickle.load(f)
+            dimensionality_reduction_method1 = 't-STE'
+            print(f"Loaded embeddings for {preprocessing_method1} from disk.")
+        else:
+            dimensionality_reduction_method1 = 't-STE'
+            reduced_embeddings1 = dimensionality_reduction.reduce_data1(preprocessed_data1, method=dimensionality_reduction_method1, ids=unique_ids1)
+            # Save embeddings to disk
+            with open(filename, 'wb') as f:
+                pickle.dump((reduced_embeddings1), f)
+    elif preprocessing_method1 == 'graph':
+        preprocessed_data1, unique_ids1, _ = preprocessing.preprocess_data_source1(data_source1a, data_source1b, method=preprocessing_method1)
+        filename = create_filename(preprocessing_method1)
+        if os.path.exists(filename):
+            # Load embeddings from disk
+            with open(filename, 'rb') as f:
+                reduced_embeddings1 = pickle.load(f)
+            dimensionality_reduction_method1 = 'TSNE'
+            print(f"Loaded embeddings for {preprocessing_method1} from disk.")
+        else:
+            dimensionality_reduction_method1 = 'TSNE'
+            reduced_embeddings1 = dimensionality_reduction.reduce_data1(preprocessed_data1, method=dimensionality_reduction_method1, ids=unique_ids1)
+            # Save embeddings to disk
+            with open(filename, 'wb') as f:
+                pickle.dump((reduced_embeddings1), f)
+
+    # Preprocess machine data
     preprocessed_data2 = preprocessing.preprocess_data_source2(data_source2)
     for model_to_use in models_to_use:
-        if model_to_use == 'clip':
-            embedding_matrix2, unique_ids2 = fit_clip.fit_model(model_to_use, preprocessed_data2)
+        filename = create_filename(model_to_use)
+        # Check if embeddings exist on disk
+        if os.path.exists(filename):
+            # Load embeddings from disk
+            with open(filename, 'rb') as f:
+                embedding_matrix2, unique_ids2 = pickle.load(f)
+            print(f"Loaded embeddings for {preprocessing_method1} and {model_to_use} from disk.")
         else:
-            embedding_matrix2, unique_ids2 = model_fitting.fit_model(model_to_use, preprocessed_data2)
+            # Calculate embeddings
+            if model_to_use == 'clip':
+                embedding_matrix2, unique_ids2 = fit_clip.fit_model(model_to_use, preprocessed_data2)
+            else:
+                embedding_matrix2, unique_ids2 = model_fitting.fit_model(model_to_use, preprocessed_data2)
+            
+            # Save embeddings to disk
+            with open(filename, 'wb') as f:
+                pickle.dump((embedding_matrix2, unique_ids2), f)
+            print(f"Saved embeddings for {preprocessing_method1} and {model_to_use} to disk.")
+        # if model_to_use == 'clip':
+        #     embedding_matrix2, unique_ids2 = fit_clip.fit_model(model_to_use, preprocessed_data2)
+        # else:
+        #     embedding_matrix2, unique_ids2 = model_fitting.fit_model(model_to_use, preprocessed_data2)
         for dimensionality_reduction_method2 in dimensionality_reduction_methods2:
             print("dimensionality_reduction_method2: ", dimensionality_reduction_method2)
             reduced_embeddings2 = dimensionality_reduction.reduce_data2(embedding_matrix2, dimensionality_reduction_method2, unique_ids2)
@@ -132,14 +201,14 @@ for preprocessing_method1 in preprocessing_methods1:
                             unique_ids2,
                             common_experiment_ids
                         )
-                        visualize.visualize_embeddings(reduced_embeddings1,
-                                                       reduced_embeddings2,
-                                                       combined_embeddings,
-                                                       unique_ids1,
-                                                       unique_ids2,
-                                                       common_experiment_ids,
-                                                       num=num,
-                                                       methods=methods)
+                        # visualize.visualize_embeddings(reduced_embeddings1,
+                        #                                reduced_embeddings2,
+                        #                                combined_embeddings,
+                        #                                unique_ids1,
+                        #                                unique_ids2,
+                        #                                common_experiment_ids,
+                        #                                num=num,
+                        #                                methods=methods)
                         # Write the results to the CSV file
                         _end = time.time()
                         _memory_use_after = py.memory_info()[0] / 2. ** 30  # Memory use in GB
@@ -190,14 +259,14 @@ for preprocessing_method1 in preprocessing_methods1:
                         unique_ids2,
                         common_experiment_ids
                     )
-                    visualize.visualize_embeddings(reduced_embeddings1,
-                                                   reduced_embeddings2,
-                                                   combined_embeddings,
-                                                   unique_ids1,
-                                                   unique_ids2,
-                                                   common_experiment_ids,
-                                                   num=num,
-                                                   methods=methods)
+                    # visualize.visualize_embeddings(reduced_embeddings1,
+                    #                                reduced_embeddings2,
+                    #                                combined_embeddings,
+                    #                                unique_ids1,
+                    #                                unique_ids2,
+                    #                                common_experiment_ids,
+                    #                                num=num,
+                    #                                methods=methods)
                     print("predictions: ", predictions)
                     # Write the results to the CSV file
                     _end = time.time()

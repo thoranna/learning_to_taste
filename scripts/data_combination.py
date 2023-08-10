@@ -2,6 +2,8 @@ import numpy as np
 from sklearn.cross_decomposition import CCA
 from packages.snack.embedding.snack import SNaCK
 from packages.icp.icp import icp
+from scipy.spatial import procrustes
+from scipy.linalg import orthogonal_procrustes
 
 def combine_data(data1, data2, unique_ids1, unique_ids2, method, preprocessing_method1):
     if method == 'CCA':
@@ -31,6 +33,22 @@ def combine_data(data1, data2, unique_ids1, unique_ids2, method, preprocessing_m
         snack = SNaCK(N)
         combined_embedding = snack.snack_embed(aligned_embedding_matrix.astype(np.float64), aligned_triplet_list)
         return combined_embedding, aligned_experiment_ids, None, None, None, None
+    if method == 'procrustes':
+        data1, common_experiment_ids1, data2, common_experiment_ids2 = align_embedding_matrices(data1, unique_ids1, data2, unique_ids2)
+        
+        # Compute the Procrustes transformation matrix
+        R, scale = orthogonal_procrustes(data1, data2)
+        
+        # Transform data2 using the computed matrix
+        data2_embeddings_aligned = np.dot(data2, R) * scale
+        
+        # Combine embeddings
+        combined_embedding = np.hstack((data1, data2_embeddings_aligned))
+        
+        if len(common_experiment_ids1) > len(common_experiment_ids2):
+            return combined_embedding, common_experiment_ids2, data1, common_experiment_ids1, data2_embeddings_aligned, common_experiment_ids2 
+        else:
+            return combined_embedding, common_experiment_ids1, data1, common_experiment_ids1, data2_embeddings_aligned, common_experiment_ids2
 
 def align_embedding_matrices(embedding_matrix1, experiment_ids1, embedding_matrix2, experiment_ids2):
     # Ensure that both experiment_ids1 and experiment_ids2 are lists of integers

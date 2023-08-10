@@ -4,6 +4,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
 from sklearn.model_selection import KFold
+import tensorflow as tf
 from imblearn.over_sampling import RandomOverSampler
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.multiclass import OneVsRestClassifier
@@ -11,6 +12,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import f1_score
 from collections import Counter
 from sklearn.dummy import DummyClassifier
+from sklearn.neural_network import MLPClassifier
 import numpy as np
 from utils.set_seed import RANDOM_SEED
 
@@ -29,7 +31,7 @@ def single_label(data_embedding, experiment_ids, d):
         le = LabelEncoder()
         labels = le.fit_transform(labels)
 
-    kf = KFold(n_splits=5, random_state=42, shuffle=True)
+    kf = KFold(n_splits=5, random_state=RANDOM_SEED, shuffle=True)
     scores = []
     shuffled_scores = []
     f1_scores = []
@@ -40,14 +42,15 @@ def single_label(data_embedding, experiment_ids, d):
         ru = RandomOverSampler(sampling_strategy='not majority', random_state=RANDOM_SEED)
         X_res, y_res = ru.fit_resample(X_train, y_train)
 
-        clf = SVC(random_state=42, class_weight='balanced')
+        # clf = SVC(random_state=42, class_weight='balanced')
+        clf = MLPClassifier(random_state=RANDOM_SEED)
         clf.fit(X_res, y_res)
         score = round(clf.score(X_test, y_test), 2)
         scores.append(score)
         y_pred = clf.predict(X_test)
         f1 = f1_score(y_test, y_pred, average='micro')
         f1_scores.append(f1)
-        
+    
         # Establishing a dummy classifier as a baseline
         dummy_clf = DummyClassifier(strategy="stratified", random_state=RANDOM_SEED)
         dummy_clf.fit(X_res, y_res)

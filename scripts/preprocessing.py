@@ -2,6 +2,37 @@ import math
 import numpy as np
 from itertools import combinations
 import pandas as pd
+import networkx as nx
+from node2vec import Node2Vec
+
+def reduce_graph_dimensionality(G, dimensions=64):
+    """
+    Use Node2Vec to reduce the graph's dimensionality.
+
+    Parameters:
+    - G: The input graph
+    - dimensions: The desired dimensionality of the embeddings
+
+    Returns:
+    - embeddings: Dictionary of node embeddings
+    - unique_ids: List of unique node IDs
+    - id_to_index: Dictionary mapping from node ID to its index
+    """
+    
+    # Create node embeddings using Node2Vec
+    node2vec = Node2Vec(G, dimensions=dimensions, walk_length=30, num_walks=200, workers=4)
+    model = node2vec.fit(window=10, min_count=1, batch_words=4)
+
+    # Fetch the embeddings for all nodes
+    embeddings = {}
+    for node in G.nodes():
+        embeddings[node] = model.wv[str(node)]
+    
+    # Create a list of unique node IDs and a mapping from ID to index
+    unique_ids = list(G.nodes())
+    id_to_index = {node: idx for idx, node in enumerate(unique_ids)}
+
+    return embeddings, unique_ids, id_to_index
 
 RIBENA = False
 
@@ -18,7 +49,7 @@ vintage_to_experiment_map = dict(zip(csv_data['vintage_id'], csv_data['experimen
 if not RIBENA:
     # Ribena ID
     value_to_remove = 67
-    vintage_to_experiment_map = {int(k): int(v) for k, v in vintage_to_experiment_map.items() if v != value_to_remove}
+    vintage_to_experiment_map = {k: v for k, v in vintage_to_experiment_map.items() if v != value_to_remove}
 
 def preprocess_data_source1(data_source_napping, data_source_rounds, method):
     data_source_napping = remove_duplicate_ids(data_source_napping)
@@ -61,6 +92,27 @@ def preprocess_data_source1(data_source_napping, data_source_rounds, method):
             else:
                 triplets[i] = [id_mapping[old_id] for old_id in triplet]
         return triplets, sorted_unique_triplet_ids, None
+    elif method == "graph":
+        distances = []
+        for _, experiment_data in data.items():
+            for _, round_data in experiment_data.items():
+                for _, experiment_data in round_data.items():
+                    point_distances = experiment_data['distances']
+                    if len(point_distances) > 0:
+                        point_distances = process_experiment_round(point_distances, 'euclidean')
+                        point_distances_normalized = normalize_values(point_distances)  
+                        distances.append(point_distances)
+        dist_matrix, unique_ids, id_to_index = create_distance_matrix(distances)
+        G = nx.Graph()
+        for i, id1 in enumerate(unique_ids):
+            for j, id2 in enumerate(unique_ids):
+                if i != j:
+                    # Convert distance to similarity (you might adjust this conversion as needed)
+                    similarity = 1 / (1 + dist_matrix[i][j])  
+                    G.add_edge(id1, id2, weight=similarity)
+        embeddings, unique_ids, id_to_index = reduce_graph_dimensionality(G)
+        embedding_matrix = np.array([embeddings[node] for node in unique_ids])
+        return embedding_matrix, unique_ids, id_to_index
 
 def preprocess_data_source2(data):
     # Add a new column 'experiment_id' based on the provided mapping

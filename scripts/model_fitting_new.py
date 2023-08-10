@@ -2,9 +2,12 @@ import torch
 import numpy as np
 from transformers import T5EncoderModel, AutoTokenizer, AlbertTokenizer, AlbertModel, \
     BartTokenizer, BartModel, AutoModel, CLIPModel, AutoImageProcessor, ViTModel, DeiTModel, ResNetModel
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from transformers import CLIPProcessor, CLIPModel
 from transformers import AutoTokenizer, CLIPTextModel
 from transformers import AutoProcessor, CLIPVisionModel
+from transformers import PegasusForConditionalGeneration, PegasusTokenizer
+from transformers import BartTokenizer, BartModel
 import torchvision.transforms.functional as F
 from torchvision import transforms
 import PIL
@@ -26,25 +29,21 @@ from utils.set_seed import RANDOM_SEED
 nltk.download('punkt')
 nltk.download('stopwords')
 
-text_models = ['t5_small', 'albert', 'bart', 'distil_bert', 'clip_text']
+text_models = ['t5_small', 'albert', 'bart', 'distil_bert', 'clip_text', 'flan_t5', 'pegasus', 'bart_large']
 image_models = ['vit_base', 'deit_small', 'resnet', 'clip_image']
 image_and_text_models = ['clip']
 
 def set_deterministic(seed=42):
     # Python
     random.seed(seed)
-    
     # Numpy
     np.random.seed(seed)
-    
     # Pytorch
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-    
     # This is to force PyTorch to use deterministic algorithms.
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-    
     # Transformers
     set_seed(seed)
 
@@ -71,6 +70,17 @@ def fit_model(model_to_fit, data):
     elif model_to_fit == 'clip_text':
         model = CLIPTextModel.from_pretrained("openai/clip-vit-base-patch32").to(device)
         tokenizer = AutoTokenizer.from_pretrained("openai/clip-vit-base-patch32")
+    elif model_to_fit == 'flan_t5':
+        model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-small")
+        tokenizer = AutoTokenizer.from_pretrained("google/flan-t5-small")
+    elif model_to_fit == 'pegasus':
+        model_name = "google/pegasus-xsum"
+        tokenizer = PegasusTokenizer.from_pretrained(model_name)
+        model = PegasusForConditionalGeneration.from_pretrained(model_name)
+    elif model_to_fit == 'bart_large':
+        tokenizer = BartTokenizer.from_pretrained('facebook/bart-large')
+        model = BartModel.from_pretrained('facebook/bart-large')
+
     # IMAGES
     elif model_to_fit == 'vit_base':
         feature_extractor = AutoImageProcessor.from_pretrained("google/vit-base-patch16-224-in21k")
@@ -220,7 +230,6 @@ def fit_model(model_to_fit, data):
 
 
 def download_process_delete_images(urls, model, model_name, device, feature_extractor, batch_size=10, embedding_dim=768, embedding_path='embeddings.hdf5'):
-    
     with h5py.File(embedding_path, 'a') as hf:  
         if "embeddings" not in hf:
             if model_name != 'resnet':
@@ -300,17 +309,37 @@ def preprocess_text(text):
     text = ' '.join(text)
     return text
 
-def create_vintage_embedding_text(model, vintage_ids, reviews, device, tokenizer=None, batch_size=10):
+def create_vintage_embedding_text(model, vintage_ids, reviews, device, tokenizer=None, batch_size=128):
     embeddings = []
+
+    # Make sure model is in eval mode and on the right device
+    # model.eval()
+    # model.to(device)
+    print("vintage ids: ", len(vintage_ids))
+    print("num batches: ", len(list(range(0, len(vintage_ids), batch_size))))
     for i in range(0, len(vintage_ids), batch_size):
+        print("batch: ", i)
         batch_vintage_ids = vintage_ids[i:i+batch_size]
         batch_reviews = reviews[i:i+batch_size]
         input_text = [f"vintage {vintage_id}: {review}" for vintage_id, review in zip(batch_vintage_ids, batch_reviews)]
         input_tokenized = tokenizer(input_text, return_tensors="pt", padding=True, truncation=True)
         # Move the tokenized input to the correct device
         input_tokenized = {k: v.to(device) for k, v in input_tokenized.items()}
+
         with torch.no_grad():
-            output = model(**input_tokenized)
-        batch_embeddings = output.last_hidden_state.mean(dim=1).numpy()
-        embeddings.append(batch_embeddings)
+            if model.__class__.__name__.lower() in ["pegasusforconditionalgeneration"]:  # Check if the model is of PEGASUS type
+                # Bypass the decoder and only get encoder's output for PEGASUS and Flan-T5
+                encoder_outputs = model.model.encoder(input_tokenized['input_ids'], attention_mask=input_tokenized['attention_mask'])
+                batch_embeddings = encoder_outputs.last_hidden_state.mean(dim=1).cpu().numpy()
+            elif model.__class__.__name__.lower() in ["t5forconditionalgeneration"]:
+                # Bypass the decoder and only get encoder's output for PEGASUS and Flan-T5
+                encoder_outputs = model.encoder(input_tokenized['input_ids'], attention_mask=input_tokenized['attention_mask'])
+                batch_embeddings = encoder_outputs.last_hidden_state.mean(dim=1).cpu().numpy()
+            else:
+                # For other models
+                output = model(**input_tokenized)
+                batch_embeddings = output.last_hidden_state.mean(dim=1).cpu().numpy()
+
+            embeddings.append(batch_embeddings)
+
     return np.vstack(embeddings)
