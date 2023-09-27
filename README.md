@@ -51,5 +51,16 @@ This script evaluates the model's performance in predicting and understanding ta
 ## Output
 The output of these scripts will be a series of files containing the results of the experiments and the taste space evaluation. You can analyze these files to understand how well the models and different combinations of methods perform. 
 
+## Citation
+If you use our code for our research, please cite our [paper](https://arxiv.org/abs/2308.16900)
+```bash
+@article{bender2023learning,
+  title={Learning to Taste: A Multimodal Wine Dataset},
+  author={Bender, Thoranna and S{\o}rensen, Simon M{\o}e and Kashani, Alireza and Hjorleifsson, K Eldjarn and Hyldig, Grethe and Hauberg, S{\o}ren and Belongie, Serge and Warburg, Frederik},
+  journal={arXiv preprint arXiv:2308.16900},
+  year={2023}
+}
+```
+
 ## Contribution
 Contributions to this project are welcome. If you find a bug or want to propose a feature, feel free to open an issue or submit a pull request.
